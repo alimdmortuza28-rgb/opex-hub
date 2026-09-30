@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OEE Entry — ABC Textile</title>
+<style>
+  :root{
+    --ink:#1c2126; --paper:#f4f6fb; --card:#ffffff; --line:#dfe4f0;
+    --accent:#1f6feb; --accent-dark:#143f8f; --muted:#62677a;
+    --warn:#c85c3c; --bad:#b3401e;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;background:var(--paper);color:var(--ink);padding:0 0 60px;}
+  .wrap{max-width:640px;margin:0 auto;padding:0 14px;}
+  .header{background:var(--accent-dark);color:#fff;padding:26px 14px 30px;}
+  .header-inner{max-width:640px;margin:0 auto;}
+  .header .eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:11px;opacity:.75;margin-bottom:6px;}
+  .header h1{margin:0 0 6px;font-size:24px;line-height:1.25;}
+  .header p{margin:0;font-size:13px;line-height:1.5;opacity:.9;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-top:14px;}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent-dark);margin:0 0 12px;}
+  .card h2 .hint{display:block;text-transform:none;letter-spacing:0;font-size:11px;color:var(--muted);margin-top:3px;font-weight:400;}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+  .row.single{grid-template-columns:1fr;}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;}
+  .field input, .field select{
+    width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:6px;
+    font-size:14px;font-family:inherit;background:#fdfdff;color:var(--ink);
+  }
+  .field input:disabled{background:#eef1f8;color:var(--muted);cursor:not-allowed;}
+  .field input:focus, .field select:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  .field.auto label::after{content:" (auto)";color:var(--accent);font-size:10px;}
+  .field.combo{position:relative;}
+  .combo-list{
+    position:absolute;top:100%;left:0;right:0;background:#fff;
+    border:1px solid var(--line);border-top:none;border-radius:0 0 6px 6px;
+    max-height:220px;overflow-y:auto;z-index:50;display:none;
+    box-shadow:0 6px 14px rgba(0,0,0,.1);
+  }
+  .combo-list.open{display:block;}
+  .combo-item{padding:9px 10px;font-size:13.5px;cursor:pointer;border-bottom:1px solid #eef1f8;}
+  .combo-item:last-child{border-bottom:none;}
+  .combo-item:hover{background:#eef1f8;}
+  .combo-item.none{color:var(--muted);font-style:italic;cursor:default;}
+  .combo-item.none:hover{background:none;}
+  .bd-row{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px;background:#fdfdff;}
+  .bd-row .row{margin-bottom:8px;}
+  .bd-row-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+  .bd-row-head span{font-size:12px;font-weight:700;color:var(--accent-dark);}
+  .bd-remove{background:none;border:none;color:var(--bad);font-size:12px;font-weight:700;cursor:pointer;padding:2px 0;}
+  .add-bd-btn{
+    width:100%;padding:10px;border:1px dashed var(--accent);border-radius:6px;
+    background:none;color:var(--accent-dark);font-weight:700;font-size:13px;cursor:pointer;
+  }
+  .add-bd-btn:disabled{opacity:.4;cursor:not-allowed;}
+  .bd-count{font-size:11px;color:var(--muted);text-align:right;margin-top:4px;}
+  .oee-hero{text-align:center;padding:6px 0 4px;}
+  .oee-hero .num{font-size:44px;font-weight:700;color:var(--accent-dark);line-height:1;}
+  .oee-hero .lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:4px;}
+  .oee-badge{display:inline-block;margin-top:10px;padding:5px 14px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.02em;background:#eef1f8;color:var(--muted);}
+  .oee-badge.world-class{background:#e9f0fb;color:#1d4fb8;}
+  .oee-badge.good{background:#e9f0fb;color:#1d4fb8;}
+  .oee-badge.average{background:#fdf2df;color:#a5710e;}
+  .oee-badge.low{background:#fbe9e3;color:var(--bad);}
+  .oee-benchmark-note{font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.4;}
+  .waterfall{display:flex;flex-direction:column;gap:0;}
+  .wf-row{display:flex;justify-content:space-between;align-items:center;padding:7px 4px;font-size:13px;border-bottom:1px dashed var(--line);}
+  .wf-row:last-child{border-bottom:none;}
+  .wf-label{color:var(--muted);}
+  .wf-val{font-weight:700;font-variant-numeric:tabular-nums;}
+  .wf-total .wf-label, .wf-total .wf-val{color:var(--ink);font-weight:700;}
+  .wf-loss .wf-label{color:var(--bad);}
+  .wf-loss .wf-val{color:var(--bad);}
+  .wf-sub{background:#eef1f8;border-radius:6px;padding-left:8px;padding-right:8px;margin:2px 0;}
+  .wf-final{background:#eef1fb;border-radius:6px;padding-left:8px;padding-right:8px;margin-top:2px;}
+  .wf-final .wf-label, .wf-final .wf-val{color:var(--accent-dark);font-weight:700;}
+  .metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;}
+  .metric{background:#eef1f8;border-radius:8px;padding:10px 8px;text-align:center;}
+  .metric .v{font-size:18px;font-weight:700;}
+  .metric .l{font-size:10.5px;color:var(--muted);margin-top:2px;}
+  .cap-row{display:flex;justify-content:space-between;font-size:13px;margin:6px 0;}
+  .cap-row .l{color:var(--muted);}
+  .cap-bar-track{height:10px;border-radius:5px;background:#dfe4f0;overflow:hidden;margin-top:4px;}
+  .cap-bar-fill{height:100%;background:var(--accent);border-radius:5px;transition:width .2s, background .2s;}
+  .cap-status{margin:8px 0 0;font-size:12.5px;font-weight:700;text-align:center;padding:6px 8px;border-radius:6px;display:none;}
+  .cap-status.over{display:block;background:#fbe9e3;color:var(--bad);}
+  .cap-status.under{display:block;background:#eef1fb;color:var(--accent-dark);}
+  .submit-btn{
+    width:100%;background:var(--accent);color:#fff;border:none;padding:14px;
+    font-size:15px;font-weight:700;border-radius:6px;cursor:pointer;margin-top:16px;
+  }
+  .submit-btn:hover{background:var(--accent-dark);}
+  .status-msg{text-align:center;font-size:13px;margin-top:10px;color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-inner">
+    <div class="eyebrow">Operational Excellence — ABC Textile</div>
+    <h1>OEE Entry</h1>
+    <p>Live OEE input with breakdown logging and shift capacity tracking.</p>
+  </div>
+</div>
+<div class="wrap">
+  <div class="card">
+    <h2>Report details</h2>
+    <div class="row">
+      <div class="field auto"><label>SBU</label><input type="text" id="f_sbu" value="ABC" disabled></div>
+      <div class="field auto"><label>Product Criteria</label><input type="text" id="f_product_criteria" value="SFG" disabled></div>
+    </div>
+    <div class="row">
+      <div class="field combo"><label>Operator Name</label><input type="text" id="f_operator_name" class="combo-input" autocomplete="off" placeholder="Type to search..."><div class="combo-list" id="f_operator_name_list"></div></div>
+      <div class="field"><label>Supervisor Name</label>
+        <select id="f_supervisor_name">
+          <option value="" disabled selected>Choose</option>
+          <option value="Sajal Howlader">Sajal Howlader</option>
+          <option value="Md. Safikul Islam">Md. Safikul Islam</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>General information</h2>
+    <div class="row">
+      <div class="field"><label>Date</label><input type="date" id="f_date"></div>
+      <div class="field"><label>Shift</label>
+        <select id="f_shift">
+          <option value="" disabled selected>Choose</option>
+          <option value="Day">Day</option>
+          <option value="Night">Night</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field combo"><label>Machine name</label><input type="text" id="f_machine" class="combo-input" autocomplete="off" placeholder="Type to search..."><div class="combo-list" id="f_machine_list"></div></div>
+      <div class="field combo"><label>Item name</label><input type="text" id="f_item" class="combo-input" autocomplete="off" placeholder="Type to search..."><div class="combo-list" id="f_item_list"></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Item master (auto-filled)</h2>
+    <div class="row">
+      <div class="field auto"><label>SKU / Item code</label><input type="text" id="f_sku" disabled></div>
+      <div class="field auto"><label>Product group</label><input type="text" id="f_group" disabled></div>
+    </div>
+    <div class="row">
+      <div class="field auto"><label>Production capacity (Pcs/Hr)</label><input type="text" id="f_capacity" disabled></div>
+      <div class="field"><label>Standard cycle time (Sec)</label><input type="number" id="f_ct" step="0.1"></div>
+    </div>
+    <div class="row single">
+      <div class="field"><label>Actual Cavity</label><input type="number" id="f_cavity" min="1"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Speed &amp; cavity loss (vs standard)
+      <span class="hint">Only fill this in if Cycle Time or Cavity changed during the shift.</span>
+    </h2>
+    <div class="row single">
+      <div class="field"><label>Actual running cycle time (Sec)</label><input type="number" id="f_ct_actual" step="0.1" placeholder="Leave blank if same as standard"></div>
+    </div>
+    <div class="row single">
+      <div class="field auto"><label>Product loss due to speed (Pcs)</label><input type="text" id="f_speedloss_qty" disabled>
+      </div>
+    </div>
+    <div class="row single">
+      <div class="field auto"><label>Speed loss — standard formula (Pcs)</label><input type="text" id="f_speedloss_official_qty" disabled>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Running Cavity (this shift)</label><input type="number" id="f_running_cavity" min="1" placeholder="Leave blank if same as Actual Cavity"></div>
+      <div class="field auto"><label>Cavity loss (Pcs)</label><input type="text" id="f_cavityloss_qty" disabled></div>
+    </div>
+    <div class="row single">
+      <div class="field auto"><label>Cavity utilization (%)</label><input type="text" id="f_cavity_util" disabled>
+      </div>
+    </div>
+    <div class="row single">
+      <div class="field auto"><label>Total loss — speed + cavity combined (Pcs)</label><input type="text" id="f_combinedloss_qty" disabled>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Production numbers</h2>
+    <div class="row">
+      <div class="field auto"><label>Shift time (Min)</label><input type="number" id="f_shifttime" value="660"></div>
+      <div class="field"><label>Planned downtime (Min)</label><input type="number" id="f_planned" value="0" min="0"></div>
+    </div>
+    <div class="row single">
+      <div class="field auto"><label>Planned downtime reason</label><input type="text" id="f_planned_reason" value="Schedule Maintenance" disabled></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Total produced qty (Pcs)</label><input type="number" id="f_produced" value="0" min="0"></div>
+      <div class="field"><label>Production Running Time Rejection (Pcs)</label><input type="number" id="f_reject" value="0" min="0"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Shift capacity &amp; speed gap (report figures, Pcs)
+      <span class="hint">Auto-calculated from Production capacity, Shift/Planned time and Cycle time above — nothing to type here.</span>
+    </h2>
+    <div class="row">
+      <div class="field auto"><label>Shift Capacity (Pcs)</label><input type="text" id="f_shift_capacity_pcs" disabled></div>
+      <div class="field auto"><label>Shift Target (Pcs)</label><input type="text" id="f_shift_target_pcs" disabled></div>
+    </div>
+    <div class="row">
+      <div class="field auto"><label>Achievement %</label><input type="text" id="f_achievement_pct" disabled></div>
+    </div>
+    <div class="row">
+      <div class="field auto"><label>Speed Gap (Cycle Time, Sec)</label><input type="text" id="f_speed_gap" disabled></div>
+      <div class="field auto"><label>Gap (%)</label><input type="text" id="f_speed_gap_pct" disabled></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Wastage</h2>
+    <div class="row">
+      <div class="field auto"><label>Wastage Target (%)</label><input type="text" id="f_wastage_target_pct" value="2" disabled></div>
+    </div>
+    <div class="row single">
+      <div class="field"><label>Wastage Reason (optional)</label><input type="text" id="f_wastage_reason" placeholder="Optional"></div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin:6px 0 0;">Actual wastage isn't entered here — it's calculated later from Production Running Time Rejection + QC's submitted reject.</p>
+  </div>
+  <div class="card">
+    <h2>Non-productive time (NPT)</h2>
+    <div class="row">
+      <div class="field"><label>Unavailable order (Min)</label><input type="number" id="npt_unavailable_order" value="0" min="0"></div>
+      <div class="field"><label>In Process Setup/Adjustment (Min)</label><input type="number" id="npt_setup_adjustment" value="0" min="0"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Utility (Gas) (Min)</label><input type="number" id="npt_utility_gas" value="0" min="0"></div>
+      <div class="field"><label>Utility (Electricity) (Min)</label><input type="number" id="npt_utility_electricity" value="0" min="0"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Manpower shortage (Min)</label><input type="number" id="npt_manpower_shortage" value="0" min="0"></div>
+      <div class="field"><label>QCO (Quick change over) (Min)</label><input type="number" id="npt_qco" value="0" min="0"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>RM shortage (Min)</label><input type="number" id="npt_rm_shortage" value="0" min="0"></div>
+      <div class="field"><label>Warehouse block (Min)</label><input type="number" id="npt_warehouse_block" value="0" min="0"></div>
+    </div>
+    <div class="row single">
+      <div class="field"><label>Others (Min)</label><input type="number" id="npt_others" value="0" min="0"></div>
+    </div>
+    <div class="row">
+      <div class="field auto"><label>Total Unplanned Time — NPT (Min)</label><input type="text" id="f_total_npt" disabled></div>
+      <div class="field auto"><label>NPT %</label><input type="text" id="f_npt_pct" disabled></div>
+    </div>
+    <div class="row">
+      <div class="field auto"><label>Available Run Time (Min)</label><input type="text" id="f_available_runtime" disabled></div>
+      <div class="field auto"><label>Actual Run Time (Min)</label><input type="text" id="f_actual_runtime" disabled></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Breakdown entry (up to 10)</h2>
+    <div id="bdContainer"></div>
+    <button class="add-bd-btn" id="addBdBtn" type="button">+ Add breakdown</button>
+    <div class="bd-count" id="bdCountLabel">0 / 10 breakdown rows added</div>
+    <div class="row" style="margin-top:12px;">
+      <div class="field auto"><label>Mechanical Breakdown (Min)</label><input type="text" id="f_mech_bd_total" disabled></div>
+      <div class="field auto"><label>Electrical Breakdown (Min)</label><input type="text" id="f_elec_bd_total" disabled></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Live OEE</h2>
+    <div class="oee-hero">
+      <div class="num" id="oeeNum">0%</div>
+      <div class="lbl">Overall equipment effectiveness</div>
+      <div class="oee-badge" id="oeeBadge">—</div>
+      <div class="oee-benchmark-note">World-Class OEE benchmark: ≥85% (Availability ≥90% · Performance ≥95% · Quality ≥99%)</div>
+    </div>
+    <div style="position:relative;height:200px;margin-top:10px;">
+      <canvas id="oeeChart" role="img" aria-label="Doughnut chart showing Availability, Performance and Quality contribution to OEE">Availability, Performance, Quality breakdown of OEE.</canvas>
+    </div>
+    <div class="metric-grid">
+      <div class="metric"><div class="v" id="mAvail">0%</div><div class="l">Availability</div></div>
+      <div class="metric"><div class="v" id="mPerf">0%</div><div class="l">Performance</div></div>
+      <div class="metric"><div class="v" id="mQual">0%</div><div class="l">Quality</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>OEE loss waterfall (Six Big Losses view)
+      <span class="hint">Shift Time reduced step-by-step down to Fully Productive Time — the standard OEE loss-tree used industry-wide (SEMI E10 / OEE.com). All values are calculated automatically from data already entered above.</span>
+    </h2>
+    <div class="waterfall" id="waterfall">
+      <div class="wf-row wf-total"><span class="wf-label">Shift time</span><span class="wf-val" id="wfShift">0 min</span></div>
+      <div class="wf-row wf-loss"><span class="wf-label">− Planned downtime</span><span class="wf-val" id="wfPlanned">0 min</span></div>
+      <div class="wf-row wf-sub"><span class="wf-label">= Planned production time</span><span class="wf-val" id="wfPPT">0 min</span></div>
+      <div class="wf-row wf-loss"><span class="wf-label">− Availability loss (breakdowns + NPT)</span><span class="wf-val" id="wfAvailLoss">0 min</span></div>
+      <div class="wf-row wf-sub"><span class="wf-label">= Run time</span><span class="wf-val" id="wfRunTime">0 min</span></div>
+      <div class="wf-row wf-loss"><span class="wf-label">− Performance loss (speed / minor stops)</span><span class="wf-val" id="wfPerfLoss">0 min</span></div>
+      <div class="wf-row wf-sub"><span class="wf-label">= Net run time</span><span class="wf-val" id="wfNetRun">0 min</span></div>
+      <div class="wf-row wf-loss"><span class="wf-label">− Quality loss (rejects, time-equivalent)</span><span class="wf-val" id="wfQualLoss">0 min</span></div>
+      <div class="wf-row wf-final"><span class="wf-label">= Fully productive time</span><span class="wf-val" id="wfFPT">0 min</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Shift capacity vs time</h2>
+    <div class="cap-row"><span class="l">Planned production time</span><span id="capPPT">0 min</span></div>
+    <div class="cap-row"><span class="l">Shift target qty (at capacity)</span><span id="capTarget">0 pcs</span></div>
+    <div class="cap-row"><span class="l">Entered produced qty</span><span id="capActual">0 pcs</span></div>
+    <div class="cap-row"><span class="l">Achievement</span><span id="capAch">0%</span></div>
+    <div class="cap-bar-track"><div class="cap-bar-fill" id="capBar" style="width:0%"></div></div>
+    <p id="capStatus" class="cap-status"></p>
+  </div>
+  <div class="card">
+    <h2>Others / Remarks</h2>
+    <div class="row single">
+      <div class="field"><textarea id="f_remarks" rows="3" style="width:100%;font-family:inherit;font-size:14px;padding:10px;border:1px solid var(--line);border-radius:6px;" placeholder="Any additional notes for this shift..."></textarea></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Section</h2>
+    <div class="row single">
+      <div class="field auto"><label>Section</label><input type="text" id="f_section" value="IMM" disabled></div>
+    </div>
+  </div>
+  <button class="submit-btn" id="submitBtn" type="button">Submit entry</button>
+  <p class="status-msg" id="statusMsg"></p>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// Paste the Web App URL you get after deploying the Apps Script here.
+// Leave "" = offline mode (entries are saved in this browser only).
+const SHEET_ENDPOINT = "https://script.google.com/macros/s/AKfycbxzYcdseX9uu1m_otm_ourhAh7Ic_mQQbnHJPvwRiK05BJsP0BwN_uT-1DZFMqo4Bek/exec";
+
+// ==================== SAMPLE ITEM MASTER ====================
+// Replace with your own items. Format: [item code, product group, item name, standard cycle time (Sec), cavity/count]
+const ITEMS = [
+["TC-1001","Yarn","Cotton Yarn Cone 40s (SFG)",30,6],
+["TC-1002","Yarn","Polyester Yarn Cone 30s (SFG)",28,6],
+["TC-1003","Yarn","Melange Yarn Cone 20s (SFG)",35,4],
+["FB-2001","Fabric","Plain Weave Fabric 60 (SFG)",22,2],
+["FB-2002","Fabric","Twill Weave Fabric 80 (SFG)",26,2],
+["FB-2003","Fabric","Satin Weave Fabric 100 (SFG)",30,2],
+["GM-3001","Garment","Basic T-Shirt (SFG)",40,8],
+["GM-3002","Garment","Polo Shirt (SFG)",48,8],
+["GM-3003","Garment","Denim Pant (SFG)",55,6],
+["AC-4001","Accessory","Printed Label (SFG)",12,16],
+["AC-4002","Accessory","Woven Tag (SFG)",14,12],
+["AC-4003","Accessory","Zipper Puller (SFG)",10,24]
+].map(r => ({code:r[0], group:r[1], name:r[2], ct:r[3], cvt:r[4]}));
+
+const MACHINES = ["A-1","A-2","A-3","A-4","A-5","B-1","B-2","B-3","B-4","B-5","B-6","B-7"];
+const OPERATOR_NAMES = ["Mozzamel Hossain","Md. Reduyan Ahamad Himel","Rakibul Hasan","Md. Matin","Md Rajib","Md Siam","Toushif Hasan","Sajib Mia","Mehedi Hasan","Mst. Lipi","Salma Akter","Mst. Nur Nahar Begum","Tanjila Katun","Mohona Akter","Mst. Nilufa Katun","Mst. Shahamina Begum","Sharifa Akter","Must. Runa Akter","Mst. Asha Akter","Sreemati Soni Rani","Bidhan Das","Shefali Akter","Hadisa Begum","Jannatul Ferdous","Ayesha Akter","Jannat Ara","Mst Rokeya Begum","Sathi Khatun","Sarmin Akter","Mst Mukta Moni"];
+const ELECTRICAL_BD = ["Servo motor fault","Servo drive/amplifier fault","PLC / HMI controller fault","Heater band failure","Thermocouple fault","Sensor fault (limit switch/proximity)","Solenoid/proportional valve fault (electrical side)","Power supply/MCB trip","Wiring/connector/cable fault","Encoder fault","Robot/manipulator electrical fault","Hopper dryer electrical fault","Mold temperature controller (MTC) electrical fault","Chiller electrical fault","Power failure (plant supply)"];
+const MECHANICAL_BD = ["Hydraulic oil leakage","Hydraulic pump failure/noise","Toggle mechanism fault/wear","Tie bar issue","Clamping cylinder leakage","Injection cylinder leakage","Screw/barrel wear","Non-return valve (check ring) wear","Nozzle blockage/leakage","Mold cooling line blockage/leak","Ejector pin stuck/broken","Mold misalignment","Platen parallelism issue","Cooling water line blockage/scaling","Compressed air pressure low","Conveyor/material loader mechanical fault"];
+document.getElementById('f_date').value = new Date().toISOString().slice(0,10);
+function capacityFor(item){
+  return Math.round((3600/item.ct)*item.cvt);
+}
+function setupCombo(inputId, listId, options, getLabel, onSelect){
+  const input = document.getElementById(inputId);
+  const list = document.getElementById(listId);
+  function render(filter){
+    const f = (filter || '').toLowerCase();
+    const matches = options.filter(o => getLabel(o).toLowerCase().includes(f));
+    list.innerHTML = '';
+    if(matches.length === 0){
+      const div = document.createElement('div');
+      div.className = 'combo-item none';
+      div.textContent = 'No matches';
+      list.appendChild(div);
+    } else {
+      matches.slice(0, 150).forEach(o => {
+        const div = document.createElement('div');
+        div.className = 'combo-item';
+        div.textContent = getLabel(o);
+        div.addEventListener('mousedown', function(e){
+          e.preventDefault();
+          input.value = getLabel(o);
+          list.classList.remove('open');
+          if(onSelect) onSelect(o);
+        });
+        list.appendChild(div);
+      });
+    }
+    list.classList.add('open');
+  }
+  input.addEventListener('focus', () => render(input.value));
+  input.addEventListener('input', () => render(input.value));
+  input.addEventListener('blur', () => { setTimeout(() => list.classList.remove('open'), 150); });
+  document.addEventListener('click', (e) => {
+    if(e.target !== input && !list.contains(e.target)){
+      list.classList.remove('open');
+    }
+  });
+}
+setupCombo('f_machine', 'f_machine_list', MACHINES, m => m, null);
+setupCombo('f_operator_name', 'f_operator_name_list', OPERATOR_NAMES, n => n, null);
+setupCombo('f_item', 'f_item_list', ITEMS, it => it.name, function(match){
+  document.getElementById('f_sku').value = match.code;
+  document.getElementById('f_group').value = match.group;
+  document.getElementById('f_capacity').value = capacityFor(match) + " pcs/hr";
+  document.getElementById('f_ct').value = match.ct;
+  document.getElementById('f_ct').disabled = true;
+  document.getElementById('f_cavity').value = match.cvt;
+  document.getElementById('f_cavity').disabled = true;
+  recalc();
+});
+document.getElementById('f_item').addEventListener('input', function(){
+  const match = ITEMS.find(it => it.name === this.value);
+  if(!match){
+    document.getElementById('f_ct').disabled = false;
+    document.getElementById('f_cavity').disabled = false;
+  }
+});
+const bdContainer = document.getElementById('bdContainer');
+const REASON_TYPE_MAP = {};
+ELECTRICAL_BD.forEach(r => REASON_TYPE_MAP[r] = 'Electrical');
+MECHANICAL_BD.forEach(r => REASON_TYPE_MAP[r] = 'Mechanical');
+function renumberBdRows(){
+  const rows = document.querySelectorAll('.bd-row');
+  rows.forEach((row, i) => {
+    row.querySelector('.bd-row-label').textContent = 'Breakdown ' + (i + 1) + ' — reason';
+    const removeBtn = row.querySelector('.bd-remove');
+    removeBtn.style.display = (i === 0) ? 'none' : 'inline-block';
+  });
+  const count = rows.length;
+  document.getElementById('addBdBtn').disabled = count >= 10;
+  document.getElementById('bdCountLabel').textContent = count + ' / 10 breakdown rows added';
+}
+function addBdRow(){
+  const count = document.querySelectorAll('.bd-row').length;
+  if(count >= 10) return;
+  const idx = count + 1;
+  const row = document.createElement('div');
+  row.className = 'bd-row';
+  row.innerHTML = `
+    <div class="bd-row-head">
+      <span class="bd-row-label">Breakdown ${idx} — reason</span>
+      <button type="button" class="bd-remove">Remove</button>
+    </div>
+    <div class="row single">
+      <div class="field">
+        <select class="bd-reason">
+          <option value="" selected>None</option>
+          <optgroup label="Electrical">
+            ${ELECTRICAL_BD.map(r => `<option value="${r}">${r}</option>`).join('')}
+          </optgroup>
+          <optgroup label="Mechanical">
+            ${MECHANICAL_BD.map(r => `<option value="${r}">${r}</option>`).join('')}
+          </optgroup>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Duration (Min)</label><input type="number" class="bd-duration" value="0" min="0"></div>
+      <div class="field auto"><label>Breakdown type</label><input type="text" class="bd-type" disabled placeholder="—"></div>
+    </div>
+  `;
+  bdContainer.appendChild(row);
+  row.querySelector('.bd-reason').addEventListener('change', function(){
+    const typeField = row.querySelector('.bd-type');
+    typeField.value = this.value ? REASON_TYPE_MAP[this.value] : '';
+    recalc();
+  });
+  row.querySelector('.bd-duration').addEventListener('input', recalc);
+  row.querySelector('.bd-remove').addEventListener('click', function(){
+    row.remove();
+    renumberBdRows();
+    recalc();
+  });
+  renumberBdRows();
+}
+document.getElementById('addBdBtn').addEventListener('click', addBdRow);
+addBdRow();
+// ---------- OEE chart / calc ----------
+let oeeChart = null;
+function initChart(){
+  const ctx = document.getElementById('oeeChart');
+  if(typeof Chart === 'undefined'){ return; }
+  oeeChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Availability','Performance','Quality'],
+      datasets: [{ data: [0,0,0], backgroundColor: ['#2a78d6','#eb6834','#7c3aed'], borderColor: '#f4f6fb', borderWidth: 2 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      cutout: '65%'
+    }
+  });
+}
+initChart();
+function pct(v){ return Math.round(Math.max(0, Math.min(100, v*100)) * 10) / 10; }
+function recalc(){
+  const shiftTime = parseFloat(document.getElementById('f_shifttime').value) || 0;
+  const planned = parseFloat(document.getElementById('f_planned').value) || 0;
+  const produced = parseFloat(document.getElementById('f_produced').value) || 0;
+  const reject = parseFloat(document.getElementById('f_reject').value) || 0;
+  const ct = parseFloat(document.getElementById('f_ct').value) || 0;
+  const cavity = parseFloat(document.getElementById('f_cavity').value) || 0;
+  const capacityText = document.getElementById('f_capacity').value;
+  const capacity = parseFloat(capacityText) || 0;
+  const NPT_IDS = ['npt_unavailable_order','npt_setup_adjustment','npt_utility_gas','npt_utility_electricity','npt_manpower_shortage','npt_qco','npt_rm_shortage','npt_warehouse_block','npt_others'];
+  let nptMinutes = 0;
+  NPT_IDS.forEach(id => { nptMinutes += parseFloat(document.getElementById(id).value) || 0; });
+  let bdMinutes = 0;
+  let mechBdMinutes = 0, elecBdMinutes = 0;
+  document.querySelectorAll('.bd-row').forEach(row => {
+    const dur = parseFloat(row.querySelector('.bd-duration').value) || 0;
+    bdMinutes += dur;
+    const bdType = (row.querySelector('.bd-type').value || '').toLowerCase();
+    if(bdType === 'mechanical') mechBdMinutes += dur;
+    else if(bdType === 'electrical') elecBdMinutes += dur;
+  });
+  document.getElementById('f_mech_bd_total').value = Math.round(mechBdMinutes) + ' min';
+  document.getElementById('f_elec_bd_total').value = Math.round(elecBdMinutes) + ' min';
+  const plannedProdTime = Math.max(0, shiftTime - planned);
+  const runTime = Math.max(0, plannedProdTime - nptMinutes - bdMinutes);
+  document.getElementById('f_total_npt').value = Math.round(nptMinutes) + ' min';
+  document.getElementById('f_npt_pct').value = (shiftTime > 0 ? ((nptMinutes / shiftTime) * 100).toFixed(1) : '0') + '%';
+  document.getElementById('f_available_runtime').value = Math.round(plannedProdTime) + ' min';
+  document.getElementById('f_actual_runtime').value = Math.round(runTime) + ' min';
+  const shiftCapacityPcs = Math.round(capacity * (shiftTime / 60));
+  const shiftTargetPcs = Math.round(capacity * (plannedProdTime / 60));
+  document.getElementById('f_shift_capacity_pcs').value = shiftCapacityPcs + ' pcs';
+  document.getElementById('f_shift_target_pcs').value = shiftTargetPcs + ' pcs';
+  document.getElementById('f_achievement_pct').value = (shiftTargetPcs > 0 ? ((produced / shiftTargetPcs) * 100).toFixed(1) : '0') + '%';
+  const ctActualForGap = parseFloat(document.getElementById('f_ct_actual').value) || 0;
+  const speedGapSec = ctActualForGap > 0 ? (ctActualForGap - ct) : 0;
+  document.getElementById('f_speed_gap').value = speedGapSec.toFixed(1) + ' sec';
+  document.getElementById('f_speed_gap_pct').value = (ct > 0 ? ((speedGapSec / ct) * 100).toFixed(1) : '0') + '%';
+  const availability = plannedProdTime > 0 ? runTime / plannedProdTime : 0;
+  const idealCycleSec = cavity > 0 ? ct / cavity : 0;
+  const performance = (runTime > 0 && idealCycleSec > 0) ? (produced * idealCycleSec) / (runTime * 60) : 0;
+  const quality = produced > 0 ? Math.max(0, (produced - reject) / produced) : 0;
+  const oee = availability * performance * quality;
+  document.getElementById('oeeNum').textContent = pct(oee) + '%';
+  document.getElementById('mAvail').textContent = pct(availability) + '%';
+  document.getElementById('mPerf').textContent = pct(Math.min(performance,1)) + '%';
+  document.getElementById('mQual').textContent = pct(quality) + '%';
+  if(oeeChart){
+    oeeChart.data.datasets[0].data = [pct(availability), pct(Math.min(performance,1)), pct(quality)];
+    oeeChart.update();
+  }
+  document.getElementById('capPPT').textContent = Math.round(plannedProdTime) + ' min';
+  const target = Math.round(capacity * (plannedProdTime/60));
+  document.getElementById('capTarget').textContent = target + ' pcs';
+  document.getElementById('capActual').textContent = Math.round(produced) + ' pcs';
+  const ach = target > 0 ? Math.round((produced/target)*100) : 0;
+  document.getElementById('capAch').textContent = ach + '%';
+  document.getElementById('capBar').style.width = Math.min(100, ach) + '%';
+  const capAchEl = document.getElementById('capAch');
+  const capBarEl = document.getElementById('capBar');
+  const capStatusEl = document.getElementById('capStatus');
+  if(target > 0 && produced > target){
+    const overBy = Math.round(((produced - target) / target) * 100);
+    capAchEl.style.color = 'var(--bad)';
+    capBarEl.style.background = 'var(--bad)';
+    capStatusEl.className = 'cap-status over';
+    capStatusEl.textContent = '⚠ Production is ' + overBy + '% above shift target (' + Math.round(produced - target) + ' pcs over).';
+  } else if(target > 0 && produced === target){
+    capAchEl.style.color = 'var(--accent-dark)';
+    capBarEl.style.background = 'var(--accent)';
+    capStatusEl.className = 'cap-status under';
+    capStatusEl.textContent = '✓ Exactly on shift target.';
+  } else {
+    capAchEl.style.color = 'var(--ink)';
+    capBarEl.style.background = 'var(--accent)';
+    capStatusEl.className = 'cap-status';
+    capStatusEl.textContent = '';
+  }
+  const ctActual = parseFloat(document.getElementById('f_ct_actual').value) || 0;
+  const speedQtyEl = document.getElementById('f_speedloss_qty');
+  if(ctActual > 0 && ct > 0 && cavity > 0){
+    const idealPerPieceStandard = ct / cavity;
+    const idealPerPieceActual = ctActual / cavity;
+    const maxAtStandard = idealPerPieceStandard > 0 ? (runTime * 60) / idealPerPieceStandard : 0;
+    const maxAtActual = idealPerPieceActual > 0 ? (runTime * 60) / idealPerPieceActual : 0;
+    const speedLossQty = Math.max(0, Math.round(maxAtStandard - maxAtActual));
+    speedQtyEl.value = speedLossQty + ' pcs';
+  } else {
+    speedQtyEl.value = '0 pcs';
+  }
+  const runningCavityInput = parseFloat(document.getElementById('f_running_cavity').value) || 0;
+  const runningCavity = runningCavityInput > 0 ? runningCavityInput : cavity;
+  const cavityLossQtyEl = document.getElementById('f_cavityloss_qty');
+  const cavityUtilEl = document.getElementById('f_cavity_util');
+  if(ct > 0 && cavity > 0 && runningCavity > 0 && runningCavity < cavity){
+    const idealPerPieceFullCavity = ct / cavity;
+    const idealPerPieceRunningCavity = ct / runningCavity;
+    const maxAtFullCavity = idealPerPieceFullCavity > 0 ? (runTime * 60) / idealPerPieceFullCavity : 0;
+    const maxAtRunningCavity = idealPerPieceRunningCavity > 0 ? (runTime * 60) / idealPerPieceRunningCavity : 0;
+    const cavityLossQty = Math.max(0, Math.round(maxAtFullCavity - maxAtRunningCavity));
+    cavityLossQtyEl.value = cavityLossQty + ' pcs';
+  } else {
+    cavityLossQtyEl.value = '0 pcs';
+  }
+  if(cavity > 0){
+    const cavityUtilPct = Math.max(0, Math.min(100, (runningCavity / cavity) * 100));
+    cavityUtilEl.value = cavityUtilPct.toFixed(1) + '%';
+  } else {
+    cavityUtilEl.value = '0%';
+  }
+  const combinedLossQtyEl = document.getElementById('f_combinedloss_qty');
+  const ctForCombined = ctActual > 0 ? ctActual : ct;
+  if(ct > 0 && cavity > 0 && ctForCombined > 0 && runningCavity > 0){
+    const maxAtStandardBoth = (runTime * 60) / (ct / cavity);
+    const maxAtActualBoth = (runTime * 60) / (ctForCombined / runningCavity);
+    const combinedLossQty = Math.max(0, Math.round(maxAtStandardBoth - maxAtActualBoth));
+    combinedLossQtyEl.value = combinedLossQty + ' pcs';
+  } else {
+    combinedLossQtyEl.value = '0 pcs';
+  }
+  const speedOfficialQtyEl = document.getElementById('f_speedloss_official_qty');
+  if(idealCycleSec > 0){
+    const theoreticalMaxAtStandard = (runTime * 60) / idealCycleSec;
+    const officialSpeedLossQty = Math.max(0, Math.round(theoreticalMaxAtStandard - produced));
+    speedOfficialQtyEl.value = officialSpeedLossQty + ' pcs';
+  } else {
+    speedOfficialQtyEl.value = '0 pcs';
+  }
+  const availabilityLossMin = nptMinutes + bdMinutes;
+  const netRunTimeMin = idealCycleSec > 0 ? (produced * idealCycleSec) / 60 : runTime;
+  const performanceLossMin = Math.max(0, runTime - netRunTimeMin);
+  const fullyProductiveTimeMin = idealCycleSec > 0 ? Math.max(0, ((produced - reject) * idealCycleSec) / 60) : 0;
+  const qualityLossMin = Math.max(0, netRunTimeMin - fullyProductiveTimeMin);
+  document.getElementById('wfShift').textContent = Math.round(shiftTime) + ' min';
+  document.getElementById('wfPlanned').textContent = Math.round(planned) + ' min';
+  document.getElementById('wfPPT').textContent = Math.round(plannedProdTime) + ' min';
+  document.getElementById('wfAvailLoss').textContent = Math.round(availabilityLossMin) + ' min';
+  document.getElementById('wfRunTime').textContent = Math.round(runTime) + ' min';
+  document.getElementById('wfPerfLoss').textContent = Math.round(performanceLossMin) + ' min';
+  document.getElementById('wfNetRun').textContent = Math.round(netRunTimeMin) + ' min';
+  document.getElementById('wfQualLoss').textContent = Math.round(qualityLossMin) + ' min';
+  document.getElementById('wfFPT').textContent = Math.round(fullyProductiveTimeMin) + ' min';
+  const oeeBadgeEl = document.getElementById('oeeBadge');
+  const oeePctVal = oee * 100;
+  oeeBadgeEl.className = 'oee-badge';
+  if(shiftTime === 0 && produced === 0){
+    oeeBadgeEl.textContent = '—';
+  } else if(oeePctVal >= 85){
+    oeeBadgeEl.classList.add('world-class');
+    oeeBadgeEl.textContent = '★ World Class';
+  } else if(oeePctVal >= 60){
+    oeeBadgeEl.classList.add('good');
+    oeeBadgeEl.textContent = 'Typical / Acceptable';
+  } else if(oeePctVal >= 40){
+    oeeBadgeEl.classList.add('average');
+    oeeBadgeEl.textContent = 'Below average';
+  } else {
+    oeeBadgeEl.classList.add('low');
+    oeeBadgeEl.textContent = 'Needs improvement';
+  }
+}
+['f_shifttime','f_planned','f_produced','f_reject','f_ct','f_ct_actual','f_cavity','f_running_cavity','npt_unavailable_order','npt_setup_adjustment','npt_utility_gas','npt_utility_electricity','npt_manpower_shortage','npt_qco','npt_rm_shortage','npt_warehouse_block','npt_others'].forEach(id => {
+  document.getElementById(id).addEventListener('input', recalc);
+});
+recalc();
+
+// ---- Local (offline) storage helpers ----
+function getSubs(){ try{ return JSON.parse(localStorage.getItem("abc_oee_submissions")||"[]"); }catch(e){ return []; } }
+function saveSub(rec){ const l=getSubs(); l.push(rec); try{ localStorage.setItem("abc_oee_submissions", JSON.stringify(l)); }catch(e){} }
+
+document.getElementById('submitBtn').addEventListener('click', function(){
+  const statusEl = document.getElementById('statusMsg');
+  const submitBtn = this;
+  const payload = {
+    sheet: "OEE Entry",
+    sbu: document.getElementById('f_sbu').value,
+    section: document.getElementById('f_section').value,
+    productCriteria: document.getElementById('f_product_criteria').value,
+    operatorName: document.getElementById('f_operator_name').value,
+    supervisorName: document.getElementById('f_supervisor_name').value,
+    date: document.getElementById('f_date').value,
+    shift: document.getElementById('f_shift').value,
+    machine: document.getElementById('f_machine').value,
+    item: document.getElementById('f_item').value,
+    sku: document.getElementById('f_sku').value,
+    productGroup: document.getElementById('f_group').value,
+    capacityPcsHr: document.getElementById('f_capacity').value,
+    cycleTimeSec: document.getElementById('f_ct').value,
+    cavity: document.getElementById('f_cavity').value,
+    shiftTimeMin: document.getElementById('f_shifttime').value,
+    plannedDowntimeMin: document.getElementById('f_planned').value,
+    plannedDowntimeReason: document.getElementById('f_planned_reason').value,
+    producedQty: document.getElementById('f_produced').value,
+    rejectQty: document.getElementById('f_reject').value,
+    npt_unavailableOrderMin: document.getElementById('npt_unavailable_order').value,
+    npt_setupAdjustmentMin: document.getElementById('npt_setup_adjustment').value,
+    npt_utilityGasMin: document.getElementById('npt_utility_gas').value,
+    npt_utilityElectricityMin: document.getElementById('npt_utility_electricity').value,
+    npt_manpowerShortageMin: document.getElementById('npt_manpower_shortage').value,
+    npt_qcoMin: document.getElementById('npt_qco').value,
+    npt_rmShortageMin: document.getElementById('npt_rm_shortage').value,
+    npt_warehouseBlockMin: document.getElementById('npt_warehouse_block').value,
+    npt_othersMin: document.getElementById('npt_others').value,
+    totalNptMin: document.getElementById('f_total_npt').value,
+    nptPercent: document.getElementById('f_npt_pct').value,
+    availableRunTimeMin: document.getElementById('f_available_runtime').value,
+    actualRunTimeMin: document.getElementById('f_actual_runtime').value,
+    mechanicalBreakdownMin: document.getElementById('f_mech_bd_total').value,
+    electricalBreakdownMin: document.getElementById('f_elec_bd_total').value,
+    shiftCapacityPcs: document.getElementById('f_shift_capacity_pcs').value,
+    shiftTargetPcs: document.getElementById('f_shift_target_pcs').value,
+    achievementPercent: document.getElementById('f_achievement_pct').value,
+    speedGapSec: document.getElementById('f_speed_gap').value,
+    speedGapPercent: document.getElementById('f_speed_gap_pct').value,
+    wastageTargetPercent: document.getElementById('f_wastage_target_pct').value,
+    wastageReason: document.getElementById('f_wastage_reason').value,
+    remarks: document.getElementById('f_remarks').value,
+    actualCycleTimeSec: document.getElementById('f_ct_actual').value,
+    speedLossQtyPcs: document.getElementById('f_speedloss_qty').value,
+    speedLossOfficialQtyPcs: document.getElementById('f_speedloss_official_qty').value,
+    runningCavity: document.getElementById('f_running_cavity').value,
+    cavityLossQtyPcs: document.getElementById('f_cavityloss_qty').value,
+    cavityUtilizationPercent: document.getElementById('f_cavity_util').value,
+    combinedSpeedCavityLossQtyPcs: document.getElementById('f_combinedloss_qty').value
+  };
+  document.querySelectorAll('.bd-row').forEach((row, i) => {
+    const n = i + 1;
+    payload["breakdown" + n + "_type"] = row.querySelector('.bd-type').value;
+    payload["breakdown" + n + "_reason"] = row.querySelector('.bd-reason').value;
+    payload["breakdown" + n + "_min"] = row.querySelector('.bd-duration').value;
+  });
+  payload.oeePercent = document.getElementById('oeeNum').textContent;
+  payload.availability = document.getElementById('mAvail').textContent;
+  payload.performance = document.getElementById('mPerf').textContent;
+  payload.quality = document.getElementById('mQual').textContent;
+  if(!payload.shift || !payload.machine || !payload.item){
+    statusEl.textContent = 'Please fill Shift, Machine name and Item name before submitting.';
+    statusEl.style.color = '#b3401e';
+    return;
+  }
+  if(!payload.sbu.trim() || !payload.section || !payload.operatorName.trim() || !payload.supervisorName.trim()){
+    statusEl.textContent = 'Please fill SBU, Section, Operator Name and Supervisor Name at the top before submitting.';
+    statusEl.style.color = '#b3401e';
+    return;
+  }
+  if((parseFloat(payload.rejectQty) || 0) > (parseFloat(payload.producedQty) || 0)){
+    statusEl.textContent = 'Reject qty cannot be more than Total produced qty. Please check the numbers.';
+    statusEl.style.color = '#b3401e';
+    return;
+  }
+  if((parseFloat(payload.runningCavity) || 0) > (parseFloat(payload.cavity) || 0)){
+    statusEl.textContent = 'Running Cavity cannot be more than Actual Cavity. Please check the numbers.';
+    statusEl.style.color = '#b3401e';
+    return;
+  }
+
+  // ---- Offline mode: save to this browser ----
+  if(!SHEET_ENDPOINT){
+    saveSub(Object.assign({}, payload, {submittedAt: new Date().toISOString()}));
+    statusEl.textContent = 'Entry submitted (saved locally).';
+    statusEl.style.color = '#143f8f';
+    resetForm();
+    return;
+  }
+  if(SHEET_ENDPOINT === "YOUR_WEB_APP_URL_HERE"){
+    statusEl.textContent = 'Google Sheet not connected yet — entry not saved.';
+    statusEl.style.color = '#b3401e';
+    return;
+  }
+
+  submitBtn.disabled = true;
+  statusEl.textContent = 'Submitting...';
+  statusEl.style.color = '#62677a';
+  fetch(SHEET_ENDPOINT, {
+    method: 'POST',
+    mode: 'no-cors',
+    credentials: 'include',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  }).then(() => {
+    statusEl.textContent = 'Entry submitted.';
+    statusEl.style.color = '#143f8f';
+    resetForm();
+    submitBtn.disabled = false;
+  }).catch(() => {
+    statusEl.textContent = 'Submitted (response not confirmed — check your sheet).';
+    statusEl.style.color = '#62677a';
+    resetForm();
+    submitBtn.disabled = false;
+  });
+});
+function resetForm(){
+  document.getElementById('f_operator_name').value = '';
+  document.getElementById('f_supervisor_name').value = '';
+  document.getElementById('f_date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('f_shift').value = '';
+  document.getElementById('f_machine').value = '';
+  document.getElementById('f_item').value = '';
+  document.getElementById('f_sku').value = '';
+  document.getElementById('f_group').value = '';
+  document.getElementById('f_capacity').value = '';
+  document.getElementById('f_ct').value = '';
+  document.getElementById('f_ct').disabled = false;
+  document.getElementById('f_ct_actual').value = '';
+  document.getElementById('f_cavity').value = '';
+  document.getElementById('f_cavity').disabled = false;
+  document.getElementById('f_running_cavity').value = '';
+  document.getElementById('f_cavity_util').value = '';
+  document.getElementById('f_combinedloss_qty').value = '';
+  document.getElementById('f_shifttime').value = 660;
+  document.getElementById('f_planned').value = 0;
+  document.getElementById('f_produced').value = 0;
+  document.getElementById('f_reject').value = 0;
+  ['npt_unavailable_order','npt_setup_adjustment','npt_utility_gas','npt_utility_electricity','npt_manpower_shortage','npt_qco','npt_rm_shortage','npt_warehouse_block','npt_others'].forEach(id => {
+    document.getElementById(id).value = 0;
+  });
+  document.getElementById('f_wastage_reason').value = '';
+  document.getElementById('f_remarks').value = '';
+  bdContainer.innerHTML = '';
+  addBdRow();
+  recalc();
+}
+</script>
+</body>
+</html>

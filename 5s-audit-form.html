@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5S Audit — ABC Textile</title>
+<style>
+  :root{
+    --ink:#1c2126;
+    --paper:#f4f6fb;
+    --card:#ffffff;
+    --line:#dfe4f0;
+    --accent:#1f6feb;
+    --accent-dark:#143f8f;
+    --warn:#b3541e;
+    --muted:#62677a;
+    --s1:#c85c3c;
+    --s2:#d99a2b;
+    --s3:#1f6feb;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI',Helvetica,Arial,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    padding:32px 16px 80px;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+  .header{
+    background:var(--accent-dark);
+    color:#fff;
+    border-radius:10px 10px 0 0;
+    padding:28px 30px;
+    border-top:6px solid var(--s2);
+  }
+  .header .eyebrow{
+    text-transform:uppercase;
+    letter-spacing:.12em;
+    font-size:12px;
+    opacity:.75;
+    margin-bottom:6px;
+  }
+  .header h1{margin:0 0 10px;font-size:24px;line-height:1.3;}
+  .header p{margin:0;font-size:13.5px;line-height:1.6;opacity:.9;}
+  .legend{
+    display:flex;gap:14px;margin-top:16px;flex-wrap:wrap;
+  }
+  .legend span{
+    font-size:12px;background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.25);
+    padding:4px 10px;border-radius:20px;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-top:none;
+    padding:26px 30px;
+  }
+  .card:last-of-type{border-radius:0 0 10px 10px;}
+  .section-title{
+    font-size:15px;
+    font-weight:700;
+    color:var(--accent-dark);
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    margin:0 0 4px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .section-title .tag{
+    background:var(--accent);
+    color:#fff;
+    font-size:11px;
+    letter-spacing:.02em;
+    padding:3px 8px;
+    border-radius:4px;
+    text-transform:none;
+    font-weight:600;
+  }
+  .section-sub{
+    font-size:12.5px;
+    color:var(--muted);
+    margin:0 0 18px;
+  }
+  .field{margin-bottom:20px;}
+  label{
+    display:block;
+    font-size:14px;
+    font-weight:600;
+    margin-bottom:6px;
+  }
+  label .req{color:var(--warn);}
+  input[type=text],
+  input[type=email],
+  input[type=date],
+  select,
+  textarea{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    font-size:14px;
+    font-family:inherit;
+    background:#fdfdff;
+    color:var(--ink);
+  }
+  input:focus,select:focus,textarea:focus{
+    outline:2px solid var(--accent);
+    outline-offset:1px;
+    border-color:var(--accent);
+  }
+  textarea{resize:vertical;min-height:60px;}
+  .radio-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .radio-pill{
+    position:relative;
+  }
+  .radio-pill input{position:absolute;opacity:0;inset:0;cursor:pointer;}
+  .radio-pill label{
+    display:inline-block;
+    margin:0;
+    padding:8px 16px;
+    border:1px solid var(--line);
+    border-radius:20px;
+    font-size:13.5px;
+    font-weight:500;
+    background:#fdfdff;
+    cursor:pointer;
+    transition:.15s;
+  }
+  .radio-pill input:checked + label{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
+  }
+  .radio-pill input:focus-visible + label{outline:2px solid var(--accent-dark);outline-offset:2px;}
+  .criterion{
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:16px 18px;
+    margin-bottom:14px;
+    background:#fdfdff;
+  }
+  .criterion p.q{
+    margin:0 0 12px;
+    font-size:14px;
+    font-weight:600;
+    line-height:1.45;
+  }
+  .criterion p.q .num{color:var(--accent);margin-right:6px;}
+  .score-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+  .score-pill{position:relative;flex:1;min-width:130px;}
+  .score-pill input{position:absolute;opacity:0;inset:0;cursor:pointer;}
+  .score-pill label{
+    display:block;
+    text-align:center;
+    padding:9px 6px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    background:#fff;
+    color:var(--ink);
+  }
+  .score-pill.s1 input:checked + label{background:var(--s1);border-color:var(--s1);color:#fff;}
+  .score-pill.s2 input:checked + label{background:var(--s2);border-color:var(--s2);color:#fff;}
+  .score-pill.s3 input:checked + label{background:var(--s3);border-color:var(--s3);color:#fff;}
+  .note-input{
+    width:100%;
+    padding:8px 10px;
+    border:1px dashed var(--line);
+    border-radius:6px;
+    font-size:13px;
+    font-family:inherit;
+    background:#fff;
+  }
+  .divider{
+    border:none;border-top:1px solid var(--line);margin:26px 0;
+  }
+  .footer-actions{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-top:none;
+    border-radius:0 0 10px 10px;
+    padding:24px 30px 30px;
+    text-align:center;
+  }
+  .submit-btn{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    padding:13px 34px;
+    font-size:15px;
+    font-weight:700;
+    border-radius:6px;
+    cursor:pointer;
+    transition:.15s;
+  }
+  .submit-btn:hover{background:var(--accent-dark);}
+  .footer-note{font-size:12px;color:var(--muted);margin-top:12px;}
+  .required-note{font-size:12px;color:var(--warn);margin-top:14px;}
+  .signature{
+    text-align:center;font-size:11.5px;color:var(--muted);margin-top:20px;
+  }
+  .history-box{
+    display:none;
+    margin-top:16px;
+    background:rgba(255,255,255,.1);
+    border:1px solid rgba(255,255,255,.25);
+    border-radius:8px;
+    padding:12px 16px;
+  }
+  .history-box.visible{display:block;}
+  .history-row{
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:13px;padding:4px 0;
+  }
+  .history-row + .history-row{border-top:1px solid rgba(255,255,255,.15);}
+  .history-row .l{opacity:.85;}
+  .history-row .v{font-weight:700;}
+  .history-note{font-size:11.5px;opacity:.75;margin-top:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="eyebrow">Operational Excellence — 5S Audit</div>
+    <h1>5S Audit — ABC Textile</h1>
+    <p>Score each criterion from 1 to 3. Complete one submission per floor, per audit.</p>
+    <div class="legend">
+      <span>1 = Not Implemented</span>
+      <span>2 = Partially Implemented</span>
+      <span>3 = Fully Implemented</span>
+    </div>
+    <div class="history-box" id="historyBox">
+      <div class="history-row"><span class="l">Previous audit (this floor)</span><span class="v" id="histPrevious">—</span></div>
+      <div class="history-row"><span class="l">This month's average (this floor)</span><span class="v" id="histAverage">—</span></div>
+      <div class="history-note" id="histNote"></div>
+    </div>
+  </div>
+  <form id="auditForm">
+    <div class="card">
+      <p class="section-title">General Information</p>
+      <p class="section-sub">Basic details for this audit submission</p>
+      <div class="field">
+        <label for="email">Email <span class="req">*</span></label>
+        <input type="email" id="email" name="email" placeholder="Your email" required>
+      </div>
+      <div class="field">
+        <label for="floor">Floor / Area <span class="req">*</span></label>
+        <select id="floor" name="floor" required>
+          <option value="" disabled selected>Choose</option>
+          <option value="IMM">IMM</option>
+          <option value="GSS">GSS</option>
+          <option value="LED">LED</option>
+          <option value="HAP">HAP</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="auditor">Auditor Name <span class="req">*</span></label>
+        <input type="text" id="auditor" name="auditor" placeholder="Your answer" required>
+      </div>
+      <div class="field">
+        <label for="date">Audit Date <span class="req">*</span></label>
+        <input type="date" id="date" name="date" required>
+      </div>
+      <div class="field">
+        <label for="shift">Shift</label>
+        <select id="shift" name="shift">
+          <option value="" disabled selected>Choose</option>
+          <option value="Day">Day</option>
+          <option value="Night">Night</option>
+          <option value="General">General</option>
+        </select>
+      </div>
+    </div>
+    <!-- SORT (Seiri) -->
+    <div class="card">
+      <p class="section-title"><span class="tag">1S</span>Sort (Seiri)</p>
+      <p class="section-sub">Only necessary items are present at the workstation</p>
+      <div class="criterion">
+        <p class="q"><span class="num">1.1</span>Unnecessary items, scrap, or obsolete materials are absent from the work area</p>
+        <div class="score-row">
+          <div class="score-pill s1"><input type="radio" name="s_1_1" value="1" id="s_1_1_1"><label for="s_1_1_1">1 · Not Implemented</label></div>
+          <div class="score-pill s2"><input type="radio" name="s_1_1" value="2" id="s_1_1_2"><label for="s_1_1_2">2 · Partial</label></div>
+          <div class="score-pill s3"><input type="radio" name="s_1_1" value="3" id="s_1_1_3"><label for="s_1_1_3">3 · Fully</label></div>
+        </div>
+        <input class="note-input" type="text" name="s_1_1_note" placeholder="Remarks (optional)">
+      </div>
+      <div class="criterion">
+        <p class="q"><span class="num">1.2</span>Red-tag / disposal process is actively used for flagged items</p>
+        <div class="score-row">
+          <div class="score-pill s1"><input type="radio" name="s_1_2" value="1" id="s_1_2_1"><label for="s_1_2_1">1 · Not Implemented</label></div>
+          <div class="score-pill s2"><input type="radio" name="s_1_2" value="2" id="s_1_2_2"><label for="s_1_2_2">2 · Partial</label></div>
+          <div class="score-pill s3"><input type="radio" name="s_1_2" value="3" id="s_1_2_3"><label for="s_1_2_3">3 · Fully</label></div>
+        </div>
+        <input class="note-input" type="text" name="s_1_2_note" placeholder="Remarks (optional)">
+      </div>
+      <div class="criterion">
+        <p class="q"><span class="num">1.3</span>Walkways, aisles, and fire exits are free of clutter and obstructions</p>
+        <div class="score-row">
+          <div class="score-pill s1"><input type="radio" name="s_1_3" value="1" id="s_1_3_1"><label for="s_1_3_1">1 · Not Implemented</label></div>
+          <div class="score-pill s2"><input type="radio" name="s_1_3" value="2" id="s_1_3_2"><label for="s_1_3_2">2 · Partial</label></div>
+          <div class="score-pill s3"><input type="radio" name="s_1_3" value="3" id="s_1_3_3"><label for="s_1_3_3">3 · Fully</label></div>
+        </div>
+        <input class="note-input" type="text" name="s_1_3_note" placeholder="Remarks (optional)">
+      </div>
+    </div>
+    <!-- SET IN ORDER -->
+    <div class="card">
+      <p class="section-title"><span class="tag">2S</span>Set in Order (Seiton)</p>
+      <p class="section-sub">A place for everything, and everything in its place</p>
+      <div class="criterion">
+        <p class="q"><span class="num">2.1</span>Tools, jigs, and fixtures have clearly labelled, dedicated storage locations</p>
+        <div class="score-row">
+          <div class="score-pill s1"><input type="radio" name="s_2_1" value="1" id="s_2_1_1"><label for="s_2_1_1">1 · Not Implemented</label></div>
+          <div class="score-pill s2"><input type="radio" name="s_2_1" value="2" id="s_2_1_2"><label for="s_2_1_2">2 · Partial</label></div>
+          <div class="score-pill s3"><input type="radio" name="s_2_1" value="3" id="s_2_1_3"><label for="s_2_1_3">3 · Fully</label></div>
+        </div>
+        <input class="note-input" type="text" name="s_2_1_note" placeholder="Remarks (optional)">
+      </div>
+      <div class="criterion">
+        <p class="q"><span class="num">2.2</span>Floor markings (lanes, WIP zones, hazard areas) are visible and followed</p>
+        <div class="score-row">
+          <div class="score-pill s1"><input type="radio" name="s_2_2" value="1" id="s_2_2_1"><label for="s_2_2_1">1 · Not Implemented</label></div>
+          <div class="score-pill s2"><input type="radio" name="s_2_2" value="2" id="s_2_2_2"><label for="s_2_2_2">2 · Partial</label></div>
+          <div class="score-pill s3"><input type="radio" name="s_2_2" value="3" id="s_2_2_3"><label for="s_2_2_3">3 · Fully</label></div>
+        </div>
+        <input class="note-input" type="text" name="s_2_2_note" placeholder="Remarks (optional)">
+      </div>
+      <div class="criterion">
+        <p class="q"><span class="num">2.3</span>Materials and WIP are stored at point of use in correct sequence</p>
+        <div class="score-row">
+          <div class="score-pill s1"><input type="radio" name="s_2_3" value="1" id="s_2_3_1"><label for="s_2_3_1">1 · Not Implemented</label></div>
+          <div class="score-pill s2"><input type="radio" name="s_2_3" value="2" id="s_2_3_2"><label for="s_2_3_2">2 · Partial</label></div>
+          <div class="score-pill s3"><input type="radio" name="s_2_3" value="3" id="s_2_3_3"><label for="s_2_3_3">3 · Fully</label></div>
+        </div>
+        <input class="note-input" type="text" name="s_2_3_note" placeholder="Remarks (optional)">
+      </div>
+    </div>
+    <!-- SHINE -->
+    <div class="card">
+      <p class="section-title"><span class="tag">3S</span>Shine (Seiso)</p>
+      <p class="section-sub">Workplace and equipment are clean and inspection-ready</p>
+      <div class="criterion">
+        <p class="q"><span class="num">3.1</span>Machines and workstations are free of dust, oil leaks, and debris</p>
+        <div class="score-row">
+          <div class="score-pill s1"><input type="radio" name="s_3_1" value="1" id="s_3_1_1"><label for="s_3_1_1">1 · Not Implemented</label></div>
+          <div class="score-pill s2"><input type="radio" name="s_3_1" value="2" id="s_3_1_2"><label for="s_3_1_2">2 · Partial</label></div>
+          <div class="score-pill s3"><input type="radio" name="s_3_1" value="3" id="s_3_1_3"><label for="s_3_1_3">3 · Fully</label></div>
+        </div>
+        <input class="note-input" type="text" name="s_3_1_note" placeholder="Remarks (optional)">
+      </div>
+      <div class="criterion">
+        <p class="q"><span class="num">3.2</span>A cleaning schedule/checklist is displayed and being followed</p>
+        <div class="score-row">
+          <div class="score-pill s1"><input type="radio" name="s_3_2" value="1" id="s_3_2_1"><label for="s_3_2_1">1 · Not Implemented</label></div>
+          <div class="score-pill s2"><input type="radio" name="s_3_2" value="2" id="s_3_2_2"><label for="s_3_2_2">2 · Partial</label></div>
+          <div class="score-pill s3"><input type="radio" name="s_3_2" value="3" id="s_3_2_3"><label for="s_3_2_3">3 · Fully</label></div>
+        </div>
+        <input class="note-input" type="text" name="s_3_2_note" placeholder="Remarks (optional)">
+      </div>
+    </div>
+    <!-- STANDARDIZE -->
+    <div class="card">
+      <p class="section-title"><span class="tag">4S</span>Standardize (Seiketsu)</p>
+      <p class="section-sub">Consistent visual standards and controls are in place</p>
+      <div class="criterion">
+        <p class="q"><span class="num">4.1</span>Visual standards (SOPs, labels, colour codes) are posted and current</p>
+        <div class="score-row">
+          <div class="score-pill s1"><input type="radio" name="s_4_1" value="1" id="s_4_1_1"><label for="s_4_1_1">1 · Not Implemented</label></div>
+          <div class="score-pill s2"><input type="radio" name="s_4_1" value="2" id="s_4_1_2"><label for="s_4_1_2">2 · Partial</label></div>
+          <div class="score-pill s3"><input type="radio" name="s_4_1" value="3" id="s_4_1_3"><label for="s_4_1_3">3 · Fully</label></div>
+        </div>
+        <input class="note-input" type="text" name="s_4_1_note" placeholder="Remarks (optional)">
+      </div>
+      <div class="criterion">
+        <p class="q"><span class="num">4.2</span>Previous audit findings have documented corrective actions with owners</p>
+        <div class="score-row">
+          <div class="score-pill s1"><input type="radio" name="s_4_2" value="1" id="s_4_2_1"><label for="s_4_2_1">1 · Not Implemented</label></div>
+          <div class="score-pill s2"><input type="radio" name="s_4_2" value="2" id="s_4_2_2"><label for="s_4_2_2">2 · Partial</label></div>
+          <div class="score-pill s3"><input type="radio" name="s_4_2" value="3" id="s_4_2_3"><label for="s_4_2_3">3 · Fully</label></div>
+        </div>
+        <input class="note-input" type="text" name="s_4_2_note" placeholder="Remarks (optional)">
+      </div>
+    </div>
+    <!-- SUSTAIN -->
+    <div class="card">
+      <p class="section-title"><span class="tag">5S</span>Sustain (Shitsuke)</p>
+      <p class="section-sub">Discipline and habits keep the first four S's alive</p>
+      <div class="criterion">
+        <p class="q"><span class="num">5.1</span>Operators can explain 5S standards for their own workstation</p>
+        <div class="score-row">
+          <div class="score-pill s1"><input type="radio" name="s_5_1" value="1" id="s_5_1_1"><label for="s_5_1_1">1 · Not Implemented</label></div>
+          <div class="score-pill s2"><input type="radio" name="s_5_1" value="2" id="s_5_1_2"><label for="s_5_1_2">2 · Partial</label></div>
+          <div class="score-pill s3"><input type="radio" name="s_5_1" value="3" id="s_5_1_3"><label for="s_5_1_3">3 · Fully</label></div>
+        </div>
+        <input class="note-input" type="text" name="s_5_1_note" placeholder="Remarks (optional)">
+      </div>
+      <div class="criterion">
+        <p class="q"><span class="num">5.2</span>Daily/weekly 5S audits are conducted per schedule with no lapses</p>
+        <div class="score-row">
+          <div class="score-pill s1"><input type="radio" name="s_5_2" value="1" id="s_5_2_1"><label for="s_5_2_1">1 · Not Implemented</label></div>
+          <div class="score-pill s2"><input type="radio" name="s_5_2" value="2" id="s_5_2_2"><label for="s_5_2_2">2 · Partial</label></div>
+          <div class="score-pill s3"><input type="radio" name="s_5_2" value="3" id="s_5_2_3"><label for="s_5_2_3">3 · Fully</label></div>
+        </div>
+        <input class="note-input" type="text" name="s_5_2_note" placeholder="Remarks (optional)">
+      </div>
+      <div class="field" style="margin-top:22px;">
+        <label for="overall">Overall Auditor Comments</label>
+        <textarea id="overall" name="overall_comments" placeholder="Summary observations, priority actions, etc."></textarea>
+      </div>
+    </div>
+    <div class="footer-actions">
+      <button type="submit" class="submit-btn">Submit Audit</button>
+      <p class="required-note">* Indicates required question</p>
+      <p class="footer-note" id="scoreSummary"></p>
+    </div>
+  </form>
+  <p class="signature">5S Audit — ABC Textile · Operational Excellence</p>
+</div>
+<script>
+// Paste the Web App URL you get after deploying the Apps Script here.
+// Leave "" = offline mode (submissions are saved in this browser only).
+const SHEET_ENDPOINT = "https://script.google.com/macros/s/AKfycbxzYcdseX9uu1m_otm_ourhAh7Ic_mQQbnHJPvwRiK05BJsP0BwN_uT-1DZFMqo4Bek/exec";
+
+// Pre-fill Floor / Area from the ?line= parameter passed by the hub
+const urlParams = new URLSearchParams(window.location.search);
+const preLine = urlParams.get('line');
+if(preLine){
+  const floorSelect = document.getElementById('floor');
+  if(floorSelect){ floorSelect.value = preLine; }
+}
+
+// ---- Local (offline) storage helpers ----
+function getSubmissions(){
+  try{ return JSON.parse(localStorage.getItem("abc_5s_submissions")||"[]"); }catch(e){ return []; }
+}
+function saveSubmission(rec){
+  const subs = getSubmissions();
+  subs.push(rec);
+  try{ localStorage.setItem("abc_5s_submissions", JSON.stringify(subs)); }catch(e){}
+}
+
+function loadFloorHistory(floor){
+  const box = document.getElementById('historyBox');
+  const prevEl = document.getElementById('histPrevious');
+  const avgEl = document.getElementById('histAverage');
+  const noteEl = document.getElementById('histNote');
+  if(!floor){ box.classList.remove('visible'); return; }
+  box.classList.add('visible');
+  if(!SHEET_ENDPOINT){
+    const subs = getSubmissions().filter(s => s["Floor / Area"] === floor);
+    if(subs.length){
+      const prev = subs[subs.length-1];
+      prevEl.textContent = prev["Score %"] + '% (on ' + prev["Audit Date"] + ')';
+      const month = new Date().toISOString().slice(0,7);
+      const monthSubs = subs.filter(s => (s["Audit Date"]||'').slice(0,7) === month);
+      if(monthSubs.length){
+        const avg = Math.round(monthSubs.reduce((a,s)=>a+parseInt(s["Score %"]||0,10),0)/monthSubs.length);
+        avgEl.textContent = avg + '% (' + monthSubs.length + ' audit' + (monthSubs.length===1?'':'s') + ')';
+      } else {
+        avgEl.textContent = 'No audits this month yet';
+      }
+    } else {
+      prevEl.textContent = 'No previous audit yet';
+      avgEl.textContent = 'No audits this month yet';
+    }
+    noteEl.textContent = 'Offline mode — history is stored in this browser.';
+    return;
+  }
+  prevEl.textContent = 'Loading...';
+  avgEl.textContent = 'Loading...';
+  noteEl.textContent = '';
+  fetchJsonp(SHEET_ENDPOINT + '?action=5sStats&floor=' + encodeURIComponent(floor))
+    .then(data => {
+      if(data && data.previousAudit){
+        prevEl.textContent = data.previousAudit.scorePercent + '% (on ' + data.previousAudit.date + ')';
+      } else {
+        prevEl.textContent = 'No previous audit yet';
+      }
+      if(data && data.monthAverage !== null && data.monthAverage !== undefined){
+        avgEl.textContent = data.monthAverage + '% (' + data.monthCount + ' audit' + (data.monthCount === 1 ? '' : 's') + ')';
+      } else {
+        avgEl.textContent = 'No audits this month yet';
+      }
+    })
+    .catch((err) => {
+      console.error('5S history: could not load ->', err);
+      prevEl.textContent = '—';
+      avgEl.textContent = '—';
+      noteEl.textContent = 'Could not load audit history right now.';
+    });
+}
+
+// JSONP loader (only used when a backend URL is configured)
+let jsonpCounter = 0;
+function fetchJsonp(url){
+  return new Promise((resolve, reject) => {
+    const callbackName = 'abc5sCallback_' + (++jsonpCounter) + '_' + Date.now();
+    const script = document.createElement('script');
+    let settled = false;
+    const cleanup = () => {
+      delete window[callbackName];
+      if(script.parentNode) script.parentNode.removeChild(script);
+      clearTimeout(timer);
+    };
+    const timer = setTimeout(() => {
+      if(settled) return;
+      settled = true; cleanup();
+      reject(new Error('timeout'));
+    }, 15000);
+    window[callbackName] = (data) => {
+      if(settled) return;
+      settled = true; cleanup();
+      resolve(data);
+    };
+    script.onerror = () => {
+      if(settled) return;
+      settled = true; cleanup();
+      reject(new Error('network error'));
+    };
+    script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + encodeURIComponent(callbackName);
+    document.body.appendChild(script);
+  });
+}
+
+document.getElementById('floor').addEventListener('change', function(){
+  loadFloorHistory(this.value);
+});
+if(preLine){
+  loadFloorHistory(preLine);
+}
+
+document.getElementById('auditForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const form = this;
+  const btn = form.querySelector('.submit-btn');
+  const summary = document.getElementById('scoreSummary');
+  // Calculate score
+  const radios = form.querySelectorAll('input[type=radio]:checked');
+  let total = 0, max = 0;
+  radios.forEach(r => { total += parseInt(r.value); max += 3; });
+  const pct = max ? Math.round((total/max)*100) : 0;
+
+  // Collect all form data
+  const formData = new FormData(form);
+  const rawData = {};
+  formData.forEach((value, key) => { rawData[key] = value; });
+  const FIELD_LABELS = {
+    email: "Email",
+    floor: "Floor / Area",
+    auditor: "Auditor Name",
+    date: "Audit Date",
+    shift: "Shift",
+    s_1_1: "1.1 Unnecessary items, scrap, or obsolete materials are absent from the work area",
+    s_1_1_note: "1.1 Remarks",
+    s_1_2: "1.2 Red-tag / disposal process is actively used for flagged items",
+    s_1_2_note: "1.2 Remarks",
+    s_1_3: "1.3 Walkways, aisles, and fire exits are free of clutter and obstructions",
+    s_1_3_note: "1.3 Remarks",
+    s_2_1: "2.1 Tools, jigs, and fixtures have clearly labelled, dedicated storage locations",
+    s_2_1_note: "2.1 Remarks",
+    s_2_2: "2.2 Floor markings (lanes, WIP zones, hazard areas) are visible and followed",
+    s_2_2_note: "2.2 Remarks",
+    s_2_3: "2.3 Materials and WIP are stored at point of use in correct sequence",
+    s_2_3_note: "2.3 Remarks",
+    s_3_1: "3.1 Machines and workstations are free of dust, oil leaks, and debris",
+    s_3_1_note: "3.1 Remarks",
+    s_3_2: "3.2 A cleaning schedule/checklist is displayed and being followed",
+    s_3_2_note: "3.2 Remarks",
+    s_4_1: "4.1 Visual standards (SOPs, labels, colour codes) are posted and current",
+    s_4_1_note: "4.1 Remarks",
+    s_4_2: "4.2 Previous audit findings have documented corrective actions with owners",
+    s_4_2_note: "4.2 Remarks",
+    s_5_1: "5.1 Operators can explain 5S standards for their own workstation",
+    s_5_1_note: "5.1 Remarks",
+    s_5_2: "5.2 Daily/weekly 5S audits are conducted per schedule with no lapses",
+    s_5_2_note: "5.2 Remarks",
+    overall: "Overall Auditor Comments"
+  };
+  const data = {};
+  Object.keys(rawData).forEach(key => {
+    const label = FIELD_LABELS[key] || key;
+    data[label] = rawData[key];
+  });
+  data["Total Score"] = total;
+  data["Max Score"] = max;
+  data["Score %"] = pct;
+  data.sheet = "5S Form";
+
+  // ---- Offline mode: save to this browser ----
+  if(!SHEET_ENDPOINT){
+    saveSubmission(data);
+    summary.textContent = `Submitted successfully — Score: ${total}/${max} points (${pct}%).`;
+    summary.style.color = "var(--accent-dark)";
+    const submittedFloor = data["Floor / Area"];
+    form.reset();
+    document.querySelectorAll('.score-pill input, .radio-pill input').forEach(i => i.checked = false);
+    btn.disabled = false;
+    btn.textContent = "Submit Audit";
+    if(submittedFloor) loadFloorHistory(submittedFloor);
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Submitting...";
+  summary.style.color = "var(--muted)";
+  summary.textContent = "";
+  fetch(SHEET_ENDPOINT, {
+    method: "POST",
+    mode: "no-cors",
+    credentials: "include",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(data)
+  })
+  .then(() => {
+    summary.textContent = `Submitted successfully — Score: ${total}/${max} points (${pct}%).`;
+    summary.style.color = "var(--accent-dark)";
+    const submittedFloor = data["Floor / Area"];
+    form.reset();
+    document.querySelectorAll('.score-pill input, .radio-pill input').forEach(i => i.checked = false);
+    btn.disabled = false;
+    btn.textContent = "Submit Audit";
+    if(submittedFloor) loadFloorHistory(submittedFloor);
+  })
+  .catch(() => {
+    summary.textContent = "Something went wrong submitting the audit. Please try again.";
+    summary.style.color = "var(--warn)";
+    btn.disabled = false;
+    btn.textContent = "Submit Audit";
+  });
+});
+</script>
+</body>
+</html>

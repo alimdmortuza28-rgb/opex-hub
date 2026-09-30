@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABC Textile Opex Hub — Operational Excellence</title>
+<meta name="theme-color" content="#1f6feb">
+<style>
+  :root{
+    --ink:#1c2126;
+    --paper:#f4f6fb;
+    --card:#ffffff;
+    --line:#dfe4f0;
+    --accent:#1f6feb;
+    --accent-dark:#143f8f;
+    --muted:#62677a;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI',Helvetica,Arial,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    padding:0 0 60px;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:0 16px;}
+  .header{
+    background:var(--accent-dark);
+    color:#fff;
+    padding:34px 16px 40px;
+  }
+  .header-inner{max-width:900px;margin:0 auto;}
+  .header .eyebrow{
+    text-transform:uppercase;
+    letter-spacing:.12em;
+    font-size:12px;
+    opacity:.75;
+    margin-bottom:8px;
+  }
+  .header h1{margin:0 0 10px;font-size:30px;line-height:1.25;}
+  .header p{margin:0;font-size:14px;line-height:1.6;opacity:.9;max-width:640px;}
+  .section-label{
+    margin:30px 0 16px;
+    font-size:13px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--accent-dark);
+  }
+  .section-sub{
+    margin:-12px 0 20px;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  @media (max-width:620px){
+    .grid{grid-template-columns:1fr;}
+  }
+  .entry-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:18px 20px;
+  }
+  .entry-top{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;}
+  .badge{
+    flex:none;
+    width:36px;height:36px;
+    border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:700;color:#fff;
+    letter-spacing:.02em;
+  }
+  .entry-title{font-size:15px;font-weight:700;margin:0 0 4px;}
+  .entry-desc{font-size:12.5px;color:var(--muted);line-height:1.5;margin:0;}
+  .entry-select-row{display:flex;gap:8px;align-items:center;}
+  select.line-select{
+    flex:1;
+    padding:9px 10px;
+    border:1px solid var(--line);
+    border-radius:6px;
+    font-size:13px;
+    font-family:inherit;
+    background:#fdfdff;
+    color:var(--ink);
+  }
+  select.line-select:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  .choose-btn{
+    flex:none;
+    background:none;
+    border:none;
+    color:var(--accent-dark);
+    font-weight:700;
+    font-size:13px;
+    cursor:pointer;
+    padding:9px 4px;
+  }
+  .choose-btn:hover{text-decoration:underline;}
+  .choose-btn:disabled{color:var(--line);cursor:not-allowed;}
+  .sub-option-row{display:flex;gap:8px;}
+  .sub-option-btn{
+    flex:1;
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    padding:10px 8px;
+    font-size:13px;
+    font-weight:700;
+    border-radius:6px;
+    cursor:pointer;
+    text-align:center;
+    text-decoration:none;
+    display:inline-block;
+  }
+  .sub-option-btn:hover{background:var(--accent-dark);}
+  .sub-option-btn.secondary{
+    background:#fdfdff;
+    color:var(--accent-dark);
+    border:1px solid var(--line);
+  }
+  .sub-option-btn.secondary:hover{background:#eef1f8;}
+  .quick-open-row{
+    text-align:center;
+    margin-top:36px;
+  }
+  .quick-open-btn{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    padding:13px 30px;
+    font-size:14.5px;
+    font-weight:700;
+    border-radius:6px;
+    cursor:pointer;
+  }
+  .quick-open-btn:hover{background:var(--accent-dark);}
+  .quick-open-btn:disabled{background:var(--line);cursor:not-allowed;}
+  .quick-open-note{
+    margin-top:10px;
+    font-size:12px;
+    color:var(--muted);
+  }
+  .signature{
+    text-align:center;
+    font-size:11.5px;
+    color:var(--muted);
+    margin-top:40px;
+  }
+
+  #hubBody{display:none;}
+  .who-bar{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+  .who-chip{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:16px;padding:5px 12px;font-size:12px;font-weight:600;}
+  .head-btn{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:16px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .head-btn:hover{background:rgba(255,255,255,.24);}
+  .login{position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;background:rgba(10,18,38,.55);backdrop-filter:blur(3px);padding:16px;}
+  .login.show{display:flex;}
+  .login-card{width:100%;max-width:400px;background:#fff;border-radius:18px;padding:28px 26px;box-shadow:0 18px 50px rgba(0,0,0,.28);}
+  .login-logo{width:56px;height:56px;border-radius:15px;margin:0 auto 12px;display:grid;place-items:center;font-size:26px;background:var(--accent-dark);color:#fff;}
+  .login-card h2{text-align:center;font-size:20px;margin:0 0 2px;}
+  .login-card>p{text-align:center;color:var(--muted);font-size:12.5px;margin:4px 0;}
+  .login-f{display:grid;gap:8px;margin-top:8px;}
+  .login-f label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+  .login-f input,.login-f select{padding:11px 12px;border:1px solid var(--line);border-radius:10px;font-size:14px;outline:none;font-family:inherit;background:#fdfdff;}
+  .login-f input:focus,.login-f select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(31,111,235,.14);}
+  .login-err{color:#c0392b;font-size:12px;font-weight:700;min-height:16px;}
+  .login-f button#loginBtn{padding:12px;border:0;border-radius:10px;background:var(--accent);color:#fff;font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .login-f button#loginBtn:hover{background:var(--accent-dark);}
+  .login-links{display:flex;justify-content:space-between;gap:8px;margin-top:4px;}
+  .hint-btn{background:none;border:none;color:#3b62c7;font-size:11.5px;font-weight:600;cursor:pointer;padding:4px 0;}
+  .hint-btn:hover{text-decoration:underline;}
+  .ok-msg{background:#e9f0fb;color:#1d4fb8;font-size:12px;font-weight:600;padding:9px 11px;border-radius:8px;margin-top:8px;display:none;white-space:pre-line;}
+  .ok-msg.show{display:block;}
+  .adm-wrap{position:fixed;inset:0;z-index:600;background:rgba(10,18,38,.5);display:none;align-items:center;justify-content:center;padding:16px;}
+  .adm-box{width:100%;max-width:600px;max-height:88vh;overflow:auto;background:#fff;border-radius:16px;padding:20px 22px;box-shadow:0 18px 50px rgba(0,0,0,.3);}
+  .adm-head{display:flex;justify-content:space-between;align-items:center;}
+  .adm-head h3{margin:0;font-size:18px;}
+  .adm-head button{border:none;background:none;font-size:22px;cursor:pointer;color:var(--muted);}
+  .adm-body h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent-dark);margin:18px 0 8px;}
+  .req-list,.user-list{list-style:none;margin:0;padding:0;}
+  .req-list li,.user-list li{border:1px solid var(--line);border-radius:9px;padding:8px 10px;margin-bottom:7px;font-size:12.5px;}
+  .req-list li b,.user-list li b{display:block;}
+  .req-list .rq,.user-list code{color:var(--muted);font-size:11px;}
+  .user-list code{display:block;font-family:inherit;}
+  .rq-act{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+  .mini{border:1px solid var(--line);background:#fdfdff;border-radius:6px;padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer;}
+  .mini.ok{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .mini.no{color:#b3401e;border-color:#e7c9bd;}
+  .empty{color:var(--muted);font-size:12.5px;font-style:italic;}
+  .create-form{display:grid;grid-template-columns:1fr 1fr;gap:8px;border:1px dashed var(--line);border-radius:10px;padding:12px;margin-bottom:6px;}
+  .create-form input,.create-form select{padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-size:13px;font-family:inherit;background:#fdfdff;}
+  .create-form button{grid-column:1/-1;padding:10px;border:0;border-radius:8px;background:var(--accent);color:#fff;font-weight:700;cursor:pointer;}
+  .create-form button:hover{background:var(--accent-dark);}
+  .adm-note{font-size:11px;color:var(--muted);background:#eef1f8;border-radius:8px;padding:8px 10px;margin-top:14px;}
+  .perm-row{margin-top:6px;display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);flex-wrap:wrap;}
+  .perm-row label{font-weight:700;color:var(--muted);}
+  .perm-row select{padding:5px 7px;border:1px solid var(--line);border-radius:6px;font-size:12px;font-family:inherit;background:#fdfdff;}
+  .perm-checks{align-items:flex-start;}
+  .perm-check{display:inline-flex;align-items:center;gap:4px;margin:2px 8px 2px 0;font-size:11.5px;color:var(--ink);font-weight:500;}
+  .perm-check input{accent-color:var(--accent);}
+  .grant-role{padding:5px 7px;border:1px solid var(--line);border-radius:6px;font-size:12px;font-family:inherit;background:#fdfdff;max-width:100%;}
+
+  /* ══════════ HUB v2: LOADER / STICKY HEADER / ANIMATIONS ══════════ */
+  html{scroll-behavior:smooth;}
+  body{
+    background-color:var(--paper);
+    background-image:radial-gradient(circle,rgba(31,111,235,.07) 1px,transparent 1px);
+    background-size:26px 26px;
+    animation:gridDrift 10s linear infinite;
+  }
+  @keyframes gridDrift{0%{background-position:0 0;}100%{background-position:26px 26px;}}
+  ::-webkit-scrollbar{width:7px;height:7px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:#c3cfe0;border-radius:10px;}
+  ::-webkit-scrollbar-thumb:hover{background:#4a86e8;}
+
+  /* ---- Loader ---- */
+  @keyframes loaderSpin{to{transform:rotate(360deg);}}
+  @keyframes loaderSpinRev{to{transform:rotate(-360deg);}}
+  @keyframes loaderPulseGlow{0%,100%{opacity:.15;transform:scale(1);}50%{opacity:.35;transform:scale(1.18);}}
+  @keyframes loaderBarGrow{0%{transform:scaleY(.15);opacity:.4;}50%{transform:scaleY(1);opacity:1;}100%{transform:scaleY(.15);opacity:.4;}}
+  @keyframes loaderSweep{0%{width:0%;opacity:1;}85%{width:92%;opacity:1;}100%{width:92%;opacity:.6;}}
+  @keyframes loaderFadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes loaderFloat{0%,100%{transform:translateY(0) rotate(0deg);opacity:.5;}33%{transform:translateY(-14px) rotate(120deg);opacity:1;}66%{transform:translateY(8px) rotate(240deg);opacity:.35;}}
+  @keyframes loaderOrbit{from{transform:rotate(0deg) translateX(52px) rotate(0deg);}to{transform:rotate(360deg) translateX(52px) rotate(-360deg);}}
+  @keyframes loaderOrbitRev{from{transform:rotate(0deg) translateX(38px) rotate(0deg);}to{transform:rotate(-360deg) translateX(38px) rotate(360deg);}}
+  @keyframes loaderScanline{0%{top:-4px;opacity:0;}10%{opacity:.6;}90%{opacity:.6;}100%{top:100%;opacity:0;}}
+  @keyframes loaderShimmer{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
+  #loading-overlay{
+    position:fixed;inset:0;z-index:9999;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    overflow:hidden;
+    background:linear-gradient(135deg,#0a1226 0%,#142a4a 50%,#0c1d38 100%);
+  }
+  #loading-overlay.fade-out{opacity:0;pointer-events:none;transition:opacity .7s ease;}
+  .ld-title{
+    font-size:1.15rem;font-weight:900;letter-spacing:.18em;text-transform:uppercase;
+    background:linear-gradient(90deg,#fff 0%,#c9d9f5 50%,#6f9fe8 100%);
+    background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    animation:loaderFadeUp .8s ease both .1s,gradientShift 5s linear infinite .1s;
+  }
+  #loader-status{
+    font-size:.7rem;color:#7a95c0;margin-top:6px;font-weight:600;
+    letter-spacing:.15em;text-transform:uppercase;
+    animation:loaderFadeUp .8s ease both .25s;
+  }
+  .loader-bar{width:220px;height:3px;background:#1c2f4a;border-radius:99px;margin-top:20px;overflow:hidden;border:1px solid #2a4a7a;animation:loaderFadeUp .8s ease both .35s;}
+  .loader-bar>div{height:100%;border-radius:99px;background:linear-gradient(90deg,#1f6feb,#4a86e8,#7db8ff,#6f9fe8);background-size:200% 100%;animation:loaderSweep 2.2s cubic-bezier(.4,0,.2,1) forwards .5s,loaderShimmer 2s linear infinite .5s;}
+
+  /* ---- Sticky header + live clock ---- */
+  .header{position:sticky;top:0;z-index:300;padding:14px 16px 16px;box-shadow:0 6px 22px rgba(12,26,48,.28);}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:2px;}
+  .who-bar{margin-bottom:0;}
+  .clockbox{display:flex;align-items:center;font-size:12.5px;font-weight:700;letter-spacing:.06em;color:#d3e2f5;text-transform:uppercase;font-variant-numeric:tabular-nums;}
+  .clock-tick{animation:clockTick 1s step-end infinite;color:#9bc3ff;}
+  @keyframes clockTick{0%,49%{opacity:1;}50%,100%{opacity:0;}}
+  #refreshBtn:active{transform:scale(.94);}
+  #refreshBtn svg{transition:transform .4s;}
+  #refreshBtn:active svg{transform:rotate(360deg);}
+
+  /* ---- Animated headings + dividers ---- */
+  @keyframes gradientShift{0%{background-position:0% center;}100%{background-position:200% center;}}
+  .grad-title-light{background:linear-gradient(90deg,#fff 0%,#d3e2f5 45%,#a5c6ff 70%,#fff 100%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gradientShift 5s linear infinite;}
+  .gradient-title{background:linear-gradient(90deg,#143f8f 0%,#1f6feb 40%,#578ae8 70%,#143f8f 100%);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:gradientShift 4s linear infinite;}
+  .grad-divider{height:1px;border:none;background:linear-gradient(90deg,transparent,#1f6feb 30%,#578ae8 50%,#8cb0f5 70%,transparent);background-size:200% auto;animation:gradientShift 3s linear infinite;opacity:.45;margin:30px auto;}
+
+  /* ---- Card FX ---- */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  .entry-card{
+    position:relative;overflow:hidden;
+    animation:fadeUp .6s cubic-bezier(.4,0,.2,1) both;
+    transition:transform .35s cubic-bezier(.4,0,.2,1),box-shadow .35s cubic-bezier(.4,0,.2,1),border-color .35s;
+    will-change:transform;
+  }
+  #cardGrid .entry-card:nth-child(1){animation-delay:.05s;}
+  #cardGrid .entry-card:nth-child(2){animation-delay:.10s;}
+  #cardGrid .entry-card:nth-child(3){animation-delay:.15s;}
+  #cardGrid .entry-card:nth-child(4){animation-delay:.20s;}
+  #cardGrid .entry-card:nth-child(5){animation-delay:.25s;}
+  #cardGrid .entry-card:nth-child(6){animation-delay:.30s;}
+  #cardGrid .entry-card:nth-child(7){animation-delay:.35s;}
+  #cardGrid .entry-card:nth-child(8){animation-delay:.40s;}
+  #cardGrid .entry-card:nth-child(9){animation-delay:.45s;}
+  #cardGrid .entry-card:nth-child(10){animation-delay:.50s;}
+  #cardGrid .entry-card:nth-child(11){animation-delay:.55s;}
+  .entry-card:hover{transform:translateY(-4px);box-shadow:0 18px 32px -12px rgba(20,63,143,.34),0 0 0 1px rgba(31,111,235,.28);border-color:#b8c8e8;}
+  .entry-card::after{
+    content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+    background:linear-gradient(105deg,transparent 40%,rgba(20,63,143,.06) 50%,transparent 60%);
+    background-size:200% 100%;background-position:200% 0;transition:background-position .55s ease;
+  }
+  .entry-card:hover::after{background-position:-100% 0;}
+  .card-top-bar{position:absolute;top:0;left:0;width:100%;height:3px;background-size:200% auto;animation:gradientShift 2.2s linear infinite paused;}
+  .entry-card:hover .card-top-bar{animation-play-state:running;}
+  .card-blob{position:absolute;width:120px;height:120px;border-radius:50%;filter:blur(44px);pointer-events:none;opacity:0;bottom:-38px;right:-30px;transition:opacity .5s ease,transform .5s ease;}
+  .entry-card:hover .card-blob{opacity:.17;transform:scale(1.25);}
+</style>
+</head>
+<body>
+<!-- ══════════ CINEMATIC LOADING OVERLAY ══════════ -->
+<div id="loading-overlay">
+  <div id="loader-particles" style="position:absolute;inset:0;pointer-events:none;"></div>
+  <div style="position:absolute;width:520px;height:520px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(31,111,235,.20) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);animation:loaderPulseGlow 3s ease-in-out infinite;"></div>
+  <div style="position:absolute;width:280px;height:280px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(125,184,255,.13) 0%,transparent 70%);top:28%;left:26%;animation:loaderPulseGlow 4s ease-in-out infinite 1s;"></div>
+  <div style="position:absolute;left:0;right:0;height:1px;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(125,184,255,.55),transparent);animation:loaderScanline 2.8s ease-in-out infinite;"></div>
+
+  <div style="position:relative;display:flex;align-items:center;justify-content:center;width:140px;height:140px;margin-bottom:26px;">
+    <svg viewBox="0 0 140 140" fill="none" style="position:absolute;inset:0;width:100%;height:100%;animation:loaderSpin 4s linear infinite;">
+      <circle cx="70" cy="70" r="64" stroke="#1c2f4a" stroke-width="2"/>
+      <circle cx="70" cy="70" r="64" stroke="url(#lg1)" stroke-width="3" stroke-linecap="round" stroke-dasharray="80 323"/>
+      <defs><linearGradient id="lg1" x1="0" y1="0" x2="140" y2="140" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#4a86e8"/><stop offset="100%" stop-color="#7db8ff"/></linearGradient></defs>
+    </svg>
+    <svg viewBox="0 0 110 110" fill="none" style="position:absolute;width:110px;height:110px;top:15px;left:15px;animation:loaderSpinRev 2.6s linear infinite;">
+      <circle cx="55" cy="55" r="50" stroke="#1c2f4a" stroke-width="1.5"/>
+      <circle cx="55" cy="55" r="50" stroke="url(#lg2)" stroke-width="2" stroke-linecap="round" stroke-dasharray="40 274" opacity=".8"/>
+      <defs><linearGradient id="lg2" x1="0" y1="0" x2="110" y2="110" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#fde68a"/></linearGradient></defs>
+    </svg>
+    <svg viewBox="0 0 80 80" fill="none" style="position:absolute;width:80px;height:80px;top:30px;left:30px;animation:loaderSpin 1.5s linear infinite;">
+      <circle cx="40" cy="40" r="35" stroke="#1c2f4a" stroke-width="1.5"/>
+      <circle cx="40" cy="40" r="35" stroke="#6f9fe8" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="12 208" opacity=".7"/>
+    </svg>
+    <div style="position:absolute;width:10px;height:10px;top:calc(50% - 5px);left:calc(50% - 5px);animation:loaderOrbit 4s linear infinite;">
+      <div style="width:10px;height:10px;border-radius:50%;background:radial-gradient(circle,#4a86e8,#1f6feb);box-shadow:0 0 8px 3px rgba(74,134,232,.7);"></div>
+    </div>
+    <div style="position:absolute;width:7px;height:7px;top:calc(50% - 3.5px);left:calc(50% - 3.5px);animation:loaderOrbitRev 2.6s linear infinite;">
+      <div style="width:7px;height:7px;border-radius:50%;background:radial-gradient(circle,#fbbf24,#b45309);box-shadow:0 0 6px 2px rgba(251,191,36,.7);"></div>
+    </div>
+    <div style="position:relative;z-index:10;width:54px;height:54px;border-radius:14px;background:linear-gradient(135deg,#1c2f4a,#0c1d38);border:1px solid rgba(125,184,255,.4);box-shadow:0 0 22px rgba(31,111,235,.35),inset 0 1px 0 rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;overflow:hidden;">
+      <div style="position:absolute;left:0;right:0;height:1px;background:rgba(125,184,255,.25);animation:loaderScanline 2s ease-in-out infinite .5s;"></div>
+      <div style="display:flex;align-items:flex-end;gap:3px;height:22px;padding:0 2px;">
+        <div style="width:5px;background:linear-gradient(to top,#4a86e8,#7db8ff);border-radius:2px 2px 0 0;transform-origin:bottom;animation:loaderBarGrow 1.2s ease-in-out infinite 0ms;"></div>
+        <div style="width:5px;background:linear-gradient(to top,#edb94c,#fde68a);border-radius:2px 2px 0 0;transform-origin:bottom;animation:loaderBarGrow 1.2s ease-in-out infinite 200ms;"></div>
+        <div style="width:5px;background:linear-gradient(to top,#1f6feb,#4a86e8);border-radius:2px 2px 0 0;transform-origin:bottom;animation:loaderBarGrow 1.2s ease-in-out infinite 400ms;"></div>
+        <div style="width:5px;background:linear-gradient(to top,#7db8ff,#b9cdf5);border-radius:2px 2px 0 0;transform-origin:bottom;animation:loaderBarGrow 1.2s ease-in-out infinite 600ms;"></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="ld-title">ABC Textile Opex Hub</p>
+  <p id="loader-status">Starting session…</p>
+  <div class="loader-bar"><div></div></div>
+
+  <div style="position:absolute;top:12%;left:8%;width:5px;height:5px;border-radius:50%;background:#4a86e8;opacity:.5;animation:loaderFloat 3.5s ease-in-out infinite 0s;"></div>
+  <div style="position:absolute;top:18%;right:10%;width:4px;height:4px;border-radius:50%;background:#7db8ff;opacity:.4;animation:loaderFloat 4s ease-in-out infinite .8s;"></div>
+  <div style="position:absolute;bottom:20%;left:12%;width:3px;height:3px;border-radius:50%;background:#fbbf24;opacity:.4;animation:loaderFloat 3s ease-in-out infinite 1.4s;"></div>
+  <div style="position:absolute;bottom:15%;right:8%;width:5px;height:5px;border-radius:50%;background:#b9cdf5;opacity:.5;animation:loaderFloat 4.5s ease-in-out infinite .3s;"></div>
+  <div style="position:absolute;top:40%;left:4%;width:3px;height:3px;border-radius:50%;background:#4a86e8;opacity:.3;animation:loaderFloat 5s ease-in-out infinite 2s;"></div>
+  <div style="position:absolute;top:55%;right:5%;width:4px;height:4px;border-radius:50%;background:#7db8ff;opacity:.3;animation:loaderFloat 3.8s ease-in-out infinite 1s;"></div>
+</div>
+<div id="hubBody">
+<div class="header">
+  <div class="header-inner">
+    <div class="topbar">
+      <div class="clockbox">
+        <span id="currentDate">-- ---- ----</span><span class="clock-tick">&nbsp;|&nbsp;</span><span id="liveClock">--:--:--</span>
+      </div>
+      <div class="who-bar">
+        <span class="who-chip" id="whoUser"></span>
+        <button class="head-btn" id="adminBtn" type="button" style="display:none">Admin Panel</button>
+        <button class="head-btn out" id="logoutBtn" type="button" style="display:none">Logout</button>
+        <button class="head-btn" id="refreshBtn" type="button" title="Reload data &amp; re-check session">&#8635;&nbsp; Refresh</button>
+      </div>
+    </div>
+    <div class="eyebrow">Operational Excellence — ABC Textile</div>
+    <h1 class="grad-title-light">ABC Textile Opex Hub</h1>
+    <p>One hub for all ABC Textile daily operations — 5S audit, OEE, SMV, bulletins and more.</p>
+  </div>
+</div>
+<div class="wrap">
+  <div class="section-label gradient-title">Tools &amp; Forms</div>
+  <div class="section-sub">Choose an option below to open a tool or form in a new tab.</div>
+  <div class="grid" id="cardGrid">
+    <!-- Operation Bulletin -->
+    <div class="entry-card" data-title="Operation Bulletin" data-url="operation-bulletin.html">
+      <div class="entry-top">
+        <div class="badge" style="background:#1d4567;">OB</div>
+        <div>
+          <p class="entry-title">Operation Bulletin</p>
+          <p class="entry-desc">Searchable operation / SMV bulletin by SKU name or item code.</p>
+        </div>
+      </div>
+      <div class="sub-option-row">
+        <a class="sub-option-btn" href="operation-bulletin.html" target="_blank" rel="noopener">Open Bulletin</a>
+      </div>
+    </div>
+    <!-- 5S Audit + Dashboard -->
+    <div class="entry-card" data-title="5S">
+      <div class="entry-top">
+        <div class="badge" style="background:#2563eb;">5S</div>
+        <div>
+          <p class="entry-title">5S Audit</p>
+          <p class="entry-desc">5S Audit scoring (Sort, Set in Order, Shine, Standardize, Sustain) per floor + live dashboard.</p>
+        </div>
+      </div>
+      <div class="sub-option-row">
+        <a class="sub-option-btn" href="5s-audit-form.html" target="_blank" rel="noopener">Audit Form</a>
+        <a class="sub-option-btn secondary" href="5s-dashboard.html" target="_blank" rel="noopener">5S Dashboard</a>
+      </div>
+    </div>
+    <!-- OEE Entry -->
+    <div class="entry-card" data-title="OEE Entry">
+      <div class="entry-top">
+        <div class="badge" style="background:#0ea5a4;">OE</div>
+        <div>
+          <p class="entry-title">OEE Entry</p>
+          <p class="entry-desc">Production OEE input with live preview, NPT &amp; breakdown logging, item master, and QC verification review.</p>
+        </div>
+      </div>
+      <div class="sub-option-row">
+        <a class="sub-option-btn" href="oee-entry.html" target="_blank" rel="noopener">Production Entry</a>
+        <a class="sub-option-btn secondary" href="qc-review.html" target="_blank" rel="noopener">QC Entry</a>
+      </div>
+    </div>
+    <!-- Production Plan -->
+    <div class="entry-card" data-title="Production Plan" data-url="production-plan.html">
+      <div class="entry-top">
+        <div class="badge" style="background:#7c3aed;">PLAN</div>
+        <div>
+          <p class="entry-title">Production Plan</p>
+          <p class="entry-desc">Daily build plan &mdash; for every SKU it shows the <b>daily production target</b> (balance &divide; working days left) so the monthly forecast and delivery commitment are met. Includes SKU / group rollups and cumulative progress.</p>
+        </div>
+      </div>
+      <div class="sub-option-row">
+        <a class="sub-option-btn" href="production-plan.html" target="_blank" rel="noopener">Open Production Plan</a>
+      </div>
+    </div>
+    <!-- Daily Production Dashboard -->
+    <div class="entry-card" data-title="Daily Production Dashboard" data-url="daily-production-dashboard.html">
+      <div class="entry-top">
+        <div class="badge" style="background:#0e7490;">OPEX</div>
+        <div>
+          <p class="entry-title">Daily Production Dashboard</p>
+          <p class="entry-desc">Executive OPEX / IE / Lean dashboard &mdash; OEE &amp; SMV, line efficiency, lost capacity, wastage PPM/Pareto, plus an auto-prioritised <b>Action Centre</b> that shows where the problem is and what to do.</p>
+        </div>
+      </div>
+      <div class="sub-option-row">
+        <a class="sub-option-btn" href="daily-production-dashboard.html" target="_blank" rel="noopener">Open Dashboard</a>
+      </div>
+    </div>
+    <!-- Production Dashboard -->
+    <div class="entry-card" data-title="Production Dashboard" data-url="dashboard/">
+      <div class="entry-top">
+        <div class="badge" style="background:#1f6feb;">BI</div>
+        <div>
+          <p class="entry-title">Production Dashboard</p>
+          <p class="entry-desc">Live Power BI&ndash;style dashboard &mdash; production, OEE, productivity and defects with cross-filtering. Auto-refreshes every 30s.</p>
+        </div>
+      </div>
+      <div class="sub-option-row">
+        <a class="sub-option-btn" href="dashboard/" target="_blank" rel="noopener">Open Dashboard</a>
+      </div>
+    </div>
+    <!-- Breakdown Entry -->
+    <div class="entry-card" data-title="Breakdown Entry" data-url="#">
+      <div class="entry-top">
+        <div class="badge" style="background:#c85c3c;">BD</div>
+        <div>
+          <p class="entry-title">Breakdown Entry</p>
+          <p class="entry-desc">Record machine / line breakdowns, downtime duration and root cause.</p>
+        </div>
+      </div>
+      <div class="entry-select-row">
+        <select class="line-select">
+          <option value="">Choose</option>
+          <option value="IMM">IMM</option>
+          <option value="GSS">GSS</option>
+          <option value="LED">LED</option>
+          <option value="HAP">HAP</option>
+        </select>
+        <button class="choose-btn" type="button">Open →</button>
+      </div>
+    </div>
+    <!-- Near Miss -->
+    <div class="entry-card" data-title="Near Miss" data-url="#">
+      <div class="entry-top">
+        <div class="badge" style="background:#b3401e;">NM</div>
+        <div>
+          <p class="entry-title">Near Miss</p>
+          <p class="entry-desc">Report near-miss incidents or unsafe situations observed on the floor.</p>
+        </div>
+      </div>
+      <div class="entry-select-row">
+        <select class="line-select">
+          <option value="">Choose</option>
+          <option value="IMM">IMM</option>
+          <option value="GSS">GSS</option>
+          <option value="LED">LED</option>
+          <option value="HAP">HAP</option>
+        </select>
+        <button class="choose-btn" type="button">Open →</button>
+      </div>
+    </div>
+    <!-- Safety Observation -->
+    <div class="entry-card" data-title="Safety Observation" data-url="#">
+      <div class="entry-top">
+        <div class="badge" style="background:#a5451e;">SO</div>
+        <div>
+          <p class="entry-title">Safety Observation</p>
+          <p class="entry-desc">Log unsafe acts and unsafe conditions with risk level.</p>
+        </div>
+      </div>
+      <div class="entry-select-row">
+        <select class="line-select">
+          <option value="">Choose</option>
+          <option value="IMM">IMM</option>
+          <option value="GSS">GSS</option>
+          <option value="LED">LED</option>
+          <option value="HAP">HAP</option>
+        </select>
+        <button class="choose-btn" type="button">Open →</button>
+      </div>
+    </div>
+    <!-- Kaizen / Improvement Idea -->
+    <div class="entry-card" data-title="Kaizen / Improvement Idea" data-url="#">
+      <div class="entry-top">
+        <div class="badge" style="background:#d99a2b;">KZ</div>
+        <div>
+          <p class="entry-title">Kaizen / Improvement Idea</p>
+          <p class="entry-desc">Continuous improvement suggestions, problem statement and expected benefit.</p>
+        </div>
+      </div>
+      <div class="entry-select-row">
+        <select class="line-select">
+          <option value="">Choose</option>
+          <option value="IMM">IMM</option>
+          <option value="GSS">GSS</option>
+          <option value="LED">LED</option>
+          <option value="HAP">HAP</option>
+        </select>
+        <button class="choose-btn" type="button">Open →</button>
+      </div>
+    </div>
+    <!-- TPM / AM Checklist -->
+    <div class="entry-card" data-title="TPM / AM Checklist" data-url="#">
+      <div class="entry-top">
+        <div class="badge" style="background:#d9a52b;">TP</div>
+        <div>
+          <p class="entry-title">TPM / AM Checklist</p>
+          <p class="entry-desc">Autonomous Maintenance checklist for daily equipment care.</p>
+        </div>
+      </div>
+      <div class="entry-select-row">
+        <select class="line-select">
+          <option value="">Choose</option>
+          <option value="IMM">IMM</option>
+          <option value="GSS">GSS</option>
+          <option value="LED">LED</option>
+          <option value="HAP">HAP</option>
+        </select>
+        <button class="choose-btn" type="button">Open →</button>
+      </div>
+    </div>
+    <!-- Skill Matrix -->
+    <div class="entry-card" data-title="Skill Matrix" data-url="#">
+      <div class="entry-top">
+        <div class="badge" style="background:#3f4f8f;">SK</div>
+        <div>
+          <p class="entry-title">Skill Matrix</p>
+          <p class="entry-desc">Operator skill assessment per process / machine.</p>
+        </div>
+      </div>
+      <div class="entry-select-row">
+        <select class="line-select">
+          <option value="">Choose</option>
+          <option value="IMM">IMM</option>
+          <option value="GSS">GSS</option>
+          <option value="LED">LED</option>
+          <option value="HAP">HAP</option>
+        </select>
+        <button class="choose-btn" type="button">Open →</button>
+      </div>
+    </div>
+    <!-- Energy Audit -->
+    <div class="entry-card" data-title="Energy Audit" data-url="#">
+      <div class="entry-top">
+        <div class="badge" style="background:#3f4f8f;">EA</div>
+        <div>
+          <p class="entry-title">Energy Audit</p>
+          <p class="entry-desc">Daily utility / energy consumption logging and observations.</p>
+        </div>
+      </div>
+      <div class="entry-select-row">
+        <select class="line-select">
+          <option value="">Choose</option>
+          <option value="IMM">IMM</option>
+          <option value="GSS">GSS</option>
+          <option value="LED">LED</option>
+          <option value="HAP">HAP</option>
+        </select>
+        <button class="choose-btn" type="button">Open →</button>
+      </div>
+    </div>
+    <!-- Meeting MOM -->
+    <div class="entry-card" data-title="Meeting MOM" data-url="#">
+      <div class="entry-top">
+        <div class="badge" style="background:#4f5a3f;">MM</div>
+        <div>
+          <p class="entry-title">Meeting MOM</p>
+          <p class="entry-desc">Minutes of meeting — attendees, decisions and action items.</p>
+        </div>
+      </div>
+      <div class="entry-select-row">
+        <select class="line-select">
+          <option value="">Choose</option>
+          <option value="IMM">IMM</option>
+          <option value="GSS">GSS</option>
+          <option value="LED">LED</option>
+          <option value="HAP">HAP</option>
+        </select>
+        <button class="choose-btn" type="button">Open →</button>
+      </div>
+    </div>
+  </div>
+  <hr class="grad-divider">
+  <div class="quick-open-row">
+    <button class="quick-open-btn" id="quickOpenBtn" disabled>Quick Open — Select a Tool</button>
+    <p class="quick-open-note">Use the options above to open any ABC Textile tool or form.</p>
+  </div>
+  <hr class="grad-divider">
+  <p class="signature">ABC Textile Opex Hub · Operational Excellence</p>
+</div>
+</div><!-- /hubBody -->
+
+<!-- LOGIN OVERLAY -->
+<div class="login" id="loginOverlay">
+  <div class="login-card">
+    <div class="login-logo">&#128272;</div>
+    <h2>Welcome to ABC Textile Opex Hub</h2>
+    <p id="loginSub">Sign in with your office email</p>
+    <div class="login-f" id="loginForm">
+      <label for="loginId">Email / ID</label>
+      <input id="loginId" type="email" autocomplete="username" placeholder="yourname@gmail.com">
+      <label for="loginPass">Password</label>
+      <input id="loginPass" type="password" autocomplete="current-password" placeholder="Password">
+      <div class="login-err" id="loginErr"></div>
+      <button id="loginBtn" type="button">Sign In</button>
+      <div class="login-links">
+        <button class="hint-btn" id="forgotBtn" type="button">Forgot password?</button>
+        <button class="hint-btn" id="requestBtn" type="button">Request access</button>
+      </div>
+    </div>
+    <div class="login-f" id="forgotPanel" style="display:none">
+      <label for="forgotEmail">Your work email</label>
+      <input id="forgotEmail" type="email" placeholder="yourname@gmail.com">
+      <div class="login-err" id="forgotErr"></div>
+      <button id="forgotSend" type="button">Send reset request</button>
+      <button class="hint-btn" id="backLogin1" type="button">&larr; Back to login</button>
+    </div>
+    <div class="login-f" id="requestPanel" style="display:none">
+      <label for="reqName">Full name</label>
+      <input id="reqName" type="text" placeholder="Your name">
+      <label for="reqEmail">Work email</label>
+      <input id="reqEmail" type="email" placeholder="yourname@gmail.com">
+      <label for="reqSection">Floor / Area</label>
+      <select id="reqSection"><option value="">Select floor</option><option>IMM</option><option>GSS</option><option>LED</option><option>HAP</option><option>Other</option></select>
+      <div class="login-err" id="reqErr"></div>
+      <button id="reqSend" type="button">Send request</button>
+      <button class="hint-btn" id="backLogin2" type="button">&larr; Back to login</button>
+    </div>
+    <div class="ok-msg" id="loginOk"></div>
+  </div>
+</div>
+<!-- ADMIN DIALOG -->
+<div class="adm-wrap" id="adminDlg">
+  <div class="adm-box">
+    <div class="adm-head"><h3>&#128110; Admin Panel</h3><button id="admClose" type="button">&times;</button></div>
+    <div class="adm-body" id="adminBody"></div>
+  </div>
+</div>
+
+<script id="data-users" type="application/json">[{"id":"alimdmortuza28@gmail.com","name":"Alim Mortuza","role":"admin","section":"","hash":"e86f78a8a3caf0b60d8e74e5942aa6d86dc150cd3c03338aef25b7d2d7e3acc7"}]</script>
+<script>
+  let lastCard = null;
+  function openCard(card){
+    const url = card.getAttribute('data-url');
+    const title = card.getAttribute('data-title');
+    if(!url || url === '#'){
+      alert(title + ' is not linked yet. Add its live form URL in the HTML (data-url attribute) once it is published.');
+      return;
+    }
+    const select = card.querySelector('.line-select');
+    const line = select ? select.value : '';
+    const finalUrl = line ? (url + (url.includes('?') ? '&' : '?') + 'line=' + encodeURIComponent(line)) : url;
+    window.open(finalUrl, '_blank');
+  }
+  document.querySelectorAll('.entry-card').forEach(card => {
+    const btn = card.querySelector('.choose-btn');
+    const select = card.querySelector('.line-select');
+    const title = card.getAttribute('data-title');
+    if(!btn || !select) return;
+    btn.addEventListener('click', () => openCard(card));
+    select.addEventListener('change', () => {
+      lastCard = card;
+      const quickBtn = document.getElementById('quickOpenBtn');
+      quickBtn.disabled = false;
+      quickBtn.textContent = 'Quick Open — ' + title;
+    });
+  });
+  document.getElementById('quickOpenBtn').addEventListener('click', () => {
+    if(lastCard) openCard(lastCard);
+  });
+</script>
+
+
+<script>
+(function(){
+  /* ================= Shared backend (Google Apps Script) =================
+     BACKEND_URL: paste your Apps Script Web App /exec URL to share users
+     and access requests across EVERY device. Leave "" = offline mode
+     (login works, but users are stored only in this browser).
+     How to get the URL: your bound Sheet -> Extensions -> Apps Script ->
+     paste apps-script/Code.gs -> Run initSheets() once -> Deploy ->
+     New deployment -> type: Web app -> Execute as: Me, Access: Anyone ->
+     copy the ".../exec" URL and paste it here. */
+  var BACKEND_URL = "https://script.google.com/macros/s/AKfycbxzYcdseX9uu1m_otm_ourhAh7Ic_mQQbnHJPvwRiK05BJsP0BwN_uT-1DZFMqo4Bek/exec";
+  var USING_BACKEND = BACKEND_URL && BACKEND_URL.indexOf("https://") === 0;
+
+  var hubBody=document.getElementById("hubBody");
+  var USERS=JSON.parse(document.getElementById("data-users").textContent||"[]");
+  var SERVER_USERS=[];
+  var SESSION=null;
+  try{var s=localStorage.getItem("abc_login_v1");if(s)SESSION=JSON.parse(s);}catch(e){}
+  var EXUSERS={};try{EXUSERS=JSON.parse(localStorage.getItem("abc_extra_users")||"{}");}catch(e){}
+  var REQS=[];try{REQS=JSON.parse(localStorage.getItem("abc_access_requests")||"[]");}catch(e){}
+  function saveReqs(){try{localStorage.setItem("abc_access_requests",JSON.stringify(REQS));}catch(e){}}
+  /* ============ Roles & module permissions ============ */
+  var MODULES=['bulletin','fives','oee','plan','dashboard','forms'];
+  var MODULE_LABELS={bulletin:'Operation Bulletin',fives:'5S Audit',oee:'OEE &amp; QC Entry',plan:'Production Plan',dashboard:'Dashboards',forms:'Other Forms'};
+  var ROLES=[{id:'admin',label:'Admin — full access'},{id:'operator',label:'Operator — all data modules'},{id:'viewer',label:'Viewer — Bulletin + 5S only'}];
+  var ROLE_PERMS={admin:MODULES.slice(),operator:MODULES.slice(),viewer:['bulletin','fives']};
+  var LEGACY_ROLE={prepared:'viewer',checker:'viewer',approver:'viewer',user:'viewer'};
+  var TITLE_MODULE={'Operation Bulletin':'bulletin','5S':'fives','OEE Entry':'oee','Production Plan':'plan','Daily Production Dashboard':'dashboard','Production Dashboard':'dashboard','Breakdown Entry':'forms','Near Miss':'forms','Safety Observation':'forms','Kaizen / Improvement Idea':'forms','TPM / AM Checklist':'forms','Skill Matrix':'forms','Energy Audit':'forms','Meeting MOM':'forms'};
+  function normalizeRole(r){if(!r)return 'viewer';if(r==='admin')return 'admin';if(r==='viewer')return 'viewer';if(ROLE_PERMS[r])return r;return LEGACY_ROLE[r]||'viewer';}
+  function resolvePerms(u){if(!u)return[];if(u.role==='admin')return MODULES.slice();if(u.perms&&u.perms.length)return u.perms.slice();var r=ROLE_PERMS[u.role]||ROLE_PERMS[LEGACY_ROLE[u.role]];return r?r.slice():[];}
+  function gateCards(){var allowed=SESSION?resolvePerms(SESSION):[];var isAdmin=SESSION&&SESSION.role==='admin';document.querySelectorAll('.entry-card').forEach(function(card){var m=TITLE_MODULE[card.getAttribute('data-title')]||'forms';card.style.display=(isAdmin||allowed.indexOf(m)!==-1)?'':'none';});}
+  function saveUsers(){try{localStorage.setItem("abc_extra_users",JSON.stringify(EXUSERS));}catch(e){}}
+  function backend(payload,cb){if(!USING_BACKEND){if(cb)cb(null);return;}try{fetch(BACKEND_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)}).then(function(){if(cb)cb({ok:true});}).catch(function(){if(cb)cb(null);});}catch(e){if(cb)cb(null);}}
+  function jsonp(url,cb){var n="abchubCallback_"+Date.now()+"_"+Math.floor(Math.random()*100000);var s=document.createElement("script");var done=false;function fin(){delete window[n];if(s.parentNode)s.parentNode.removeChild(s);clearTimeout(t);}var t=setTimeout(function(){if(!done){done=true;fin();cb(null);}},15000);window[n]=function(d){if(done)return;done=true;fin();cb(d);};s.onerror=function(){if(!done){done=true;fin();cb(null);}};s.src=url+(url.indexOf("?")!==-1?"&":"?")+"callback="+encodeURIComponent(n);document.body.appendChild(s);}
+  function pullServer(done){if(!USING_BACKEND){if(done)done();return;}SERVER_USERS=[];jsonp(BACKEND_URL+"?action=list",function(j){if(j&&j.ok){SERVER_USERS=j.users||[];if(j.requests){REQS=j.requests;saveReqs();}if(SESSION){var u=SERVER_USERS.filter(function(x){return String(x.id).toLowerCase()===(SESSION.id||"").toLowerCase();})[0];if(u){SESSION.name=u.name;SESSION.role=u.role;SESSION.section=u.section||"";SESSION.perms=u.perms||[];try{localStorage.setItem("abc_login_v1",JSON.stringify(SESSION));}catch(e){}gateCards();if(SESSION.role==="admin")adminBtn.style.display="inline-block";whoUser.textContent=SESSION.name+(SESSION.section?" \u00b7 "+SESSION.section:"")+" \u00b7 "+SESSION.role.toUpperCase();}}}if(done)done();});}
+  function allUsers(){if(USING_BACKEND&&SERVER_USERS.length)return SERVER_USERS;return USERS.concat(Object.keys(EXUSERS).map(function(k){return{id:k,name:EXUSERS[k].name,role:EXUSERS[k].role,section:EXUSERS[k].section||"",hash:EXUSERS[k].hash};}));}
+  function findUser(em){em=em.toLowerCase();var list=(USING_BACKEND&&SERVER_USERS.length)?SERVER_USERS:USERS;for(var i=0;i<list.length;i++){if(list[i].id.toLowerCase()===em)return list[i];}var ex=EXUSERS[em];if(ex)return{id:em,name:ex.name,role:ex.role,section:ex.section||"",hash:ex.hash};return null;}
+  function sha256Hex(str){return new Promise(function(resolve){if(window.crypto&&crypto.subtle){crypto.subtle.digest("SHA-256",new TextEncoder().encode(str)).then(function(buf){resolve(Array.from(new Uint8Array(buf)).map(function(b){return("0"+b.toString(16)).slice(-2);}).join(""));}).catch(function(){resolve(fallbackHash(str));});}else resolve(fallbackHash(str));});}
+  function fallbackHash(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return("00000000"+(h>>>0).toString(16)).slice(-8);}
+  function makePass(){return"Ab@"+(Math.floor(1000+Math.random()*9000));}
+  var overlay=document.getElementById("loginOverlay");
+  var loginId=document.getElementById("loginId"),loginPass=document.getElementById("loginPass"),loginErr=document.getElementById("loginErr"),loginBtn=document.getElementById("loginBtn");
+  var loginForm=document.getElementById("loginForm"),loginOk=document.getElementById("loginOk"),loginSub=document.getElementById("loginSub");
+  var forgotPanel=document.getElementById("forgotPanel"),forgotEmail=document.getElementById("forgotEmail"),forgotErr=document.getElementById("forgotErr"),forgotSend=document.getElementById("forgotSend"),forgotBtn=document.getElementById("forgotBtn");
+  var requestPanel=document.getElementById("requestPanel"),reqName=document.getElementById("reqName"),reqEmail=document.getElementById("reqEmail"),reqSection=document.getElementById("reqSection"),reqErr=document.getElementById("reqErr"),reqSend=document.getElementById("reqSend"),requestBtn=document.getElementById("requestBtn");
+  var backLogin1=document.getElementById("backLogin1"),backLogin2=document.getElementById("backLogin2");
+  var whoUser=document.getElementById("whoUser"),adminBtn=document.getElementById("adminBtn"),logoutBtn=document.getElementById("logoutBtn");
+  var adminDlg=document.getElementById("adminDlg"),admClose=document.getElementById("admClose");
+  function showLogin(){overlay.classList.add("show");overlay.style.display="flex";}
+  function hideLogin(){overlay.classList.remove("show");overlay.style.display="none";}
+  function showPanel(w){loginForm.style.display=w==="login"?"grid":"none";forgotPanel.style.display=w==="forgot"?"grid":"none";requestPanel.style.display=w==="request"?"grid":"none";loginSub.textContent=w==="login"?"Sign in with your office email":w==="forgot"?"Reset your password":"Request access";loginOk.textContent="";loginOk.className="ok-msg";loginErr.textContent="";forgotErr.textContent="";reqErr.textContent="";}
+  function showOk(m){loginOk.textContent=m;loginOk.className="ok-msg show";}
+  function applySession(){if(SESSION){hideLogin();adminDlg.style.display="none";hubBody.style.display="block";whoUser.textContent=SESSION.name+(SESSION.section?" \u00b7 "+SESSION.section:"")+" \u00b7 "+SESSION.role.toUpperCase();logoutBtn.style.display="inline-block";adminBtn.style.display=SESSION.role==="admin"?"inline-block":"none";gateCards();renderAdminBtn();}else{hubBody.style.display="none";whoUser.textContent="";logoutBtn.style.display="none";adminBtn.style.display="none";showLogin();showPanel("login");}}
+  logoutBtn.addEventListener("click",function(){SESSION=null;try{localStorage.removeItem("abc_login_v1");}catch(e){}loginPass.value="";applySession();});
+  function doLogin(){var email=(loginId.value||"").trim().toLowerCase(),pw=loginPass.value||"";if(!email||!pw){loginErr.textContent="Enter email and password";return;}sha256Hex(pw).then(function(h){var attempt=function(){var u=findUser(email);if(!u){loginErr.textContent="No account. Use \u201cRequest access\u201d.";return;}if(u.hash!==h){loginErr.textContent="Wrong password. Use \u201cForgot password?\u201d";return;}SESSION={id:u.id,name:u.name,role:u.role,section:u.section||"",perms:u.perms||[]};try{localStorage.setItem("abc_login_v1",JSON.stringify(SESSION));}catch(e){}loginErr.textContent="";loginId.value="";loginPass.value="";applySession();};if(USING_BACKEND&&!SERVER_USERS.length){pullServer(attempt);}else attempt();});}
+  loginBtn.addEventListener("click",doLogin);
+  [loginId,loginPass].forEach(function(i){i.addEventListener("keydown",function(e){if(e.key==="Enter")doLogin();});});
+  forgotBtn.addEventListener("click",function(){showPanel("forgot");forgotEmail.focus();});
+  requestBtn.addEventListener("click",function(){showPanel("request");reqName.focus();});
+  backLogin1.addEventListener("click",function(){showPanel("login");});
+  backLogin2.addEventListener("click",function(){showPanel("login");});
+  forgotSend.addEventListener("click",function(){var em=(forgotEmail.value||"").trim().toLowerCase();if(!em){forgotErr.textContent="Enter your email";return;}if(!findUser(em)){forgotErr.textContent="No account with this email.";return;}forgotErr.textContent="";REQS.push({type:"reset",email:em,when:new Date().toLocaleString()});saveReqs();backend({action:"request",type:"reset",email:em},function(){});showOk("Reset request sent to the Administrator.");forgotEmail.value="";});
+  reqSend.addEventListener("click",function(){var nm=(reqName.value||"").trim(),em=(reqEmail.value||"").trim().toLowerCase(),sec=reqSection.value;if(!nm||!em){reqErr.textContent="Enter your name and email";return;}if(findUser(em)){reqErr.textContent="This email already has an account.";return;}reqErr.textContent="";REQS.push({type:"access",name:nm,email:em,section:sec||"",when:new Date().toLocaleString()});saveReqs();backend({action:"request",type:"access",name:nm,email:em,section:sec||""},function(){});showOk("Access request sent to the Administrator.");reqName.value="";reqEmail.value="";reqSection.value="";});
+  function renderAdminBtn(){var p=REQS.filter(function(r){return!r.done;}).length;adminBtn.textContent=p?"Admin Panel ("+p+")":"Admin Panel";}
+  function reloadStore(){try{EXUSERS=JSON.parse(localStorage.getItem("abc_extra_users")||"{}");}catch(e){EXUSERS={};}try{REQS=JSON.parse(localStorage.getItem("abc_access_requests")||"[]");}catch(e){REQS=[];}}
+  function openAdmin(){reloadStore();if(USING_BACKEND){pullServer(function(){renderAdmin();});}else renderAdmin();}
+  function afterMutation(){if(USING_BACKEND){pullServer(function(){reloadStore();renderAdmin();renderAdminBtn();});}else{reloadStore();renderAdmin();renderAdminBtn();}}
+  function renderAdmin(){var body=document.getElementById("adminBody");body.innerHTML="";var pending=REQS.filter(function(r){return!r.done;}).length;var h="<h3>Create a user (manual)</h3><div class=\"create-form\"><input id=\"cName\" placeholder=\"Full name\"><input id=\"cEmail\" type=\"email\" placeholder=\"work email\"><select id=\"cRole\">";ROLES.forEach(function(r){h+="<option value=\""+r.id+"\""+(r.id==="viewer"?" selected":"")+">"+r.label+"</option>";});h+="</select><select id=\"cSection\"><option value=\"\">Floor \u00b7 None</option><option>IMM</option><option>GSS</option><option>LED</option><option>HAP</option><option>Other</option></select><button id=\"cCreate\" type=\"button\">Generate ID &amp; Password</button></div><h3>Pending requests ("+pending+")</h3>";if(!pending)h+="<p class=\"empty\">No pending requests.</p>";h+="<ul class=\"req-list\">";REQS.forEach(function(r,i){h+="<li data-i=\""+i+"\"><b>"+(r.name||r.email)+"</b> <span class=\"rq\">"+(r.type==="access"?("Access \u00b7 "+(r.section||"any")):"Password reset")+"</span> <span class=\"rq\">"+r.when+"</span>";if(r.type==="access"){h+="<div class=\"rq-act\"><select class=\"grant-role\">";ROLES.forEach(function(rr){h+="<option value=\""+rr.id+"\""+(rr.id==="viewer"?" selected":"")+">"+rr.label+"</option>";});h+="</select><button class=\"mini ok\" data-act=\"grant\">Approve</button><button class=\"mini no\" data-act=\"deny\">Deny</button></div>";}else{h+="<div class=\"rq-act\"><button class=\"mini ok\" data-act=\"grantpass\">Set new password</button><button class=\"mini no\" data-act=\"deny\">Deny</button></div>";}h+="</li>";});h+="</ul><h3>Users ("+allUsers().length+")</h3><ul class=\"user-list\">";allUsers().forEach(function(u){var isAdmin=u.role==="admin";var perms=resolvePerms(u);h+="<li data-em=\""+u.id+"\"><b>"+u.name+"</b> <span class=\"rq\">"+u.role+(u.section?" \u00b7 "+u.section:"")+"</span><code>"+u.id+"</code><div class=\"perm-row\"><label>Role</label><select class=\"u-role\">";ROLES.forEach(function(rr){h+="<option value=\""+rr.id+"\""+(u.role===rr.id?" selected":"")+">"+rr.label+"</option>";});h+="</select></div>";if(isAdmin){h+="<div class=\"perm-row\"><span class=\"rq\">Full access (admin)</span></div>";}else{h+="<div class=\"perm-row perm-checks\">";MODULES.forEach(function(m){var ck=perms.indexOf(m)!==-1;h+="<label class=\"perm-check\"><input type=\"checkbox\" data-mod=\""+m+"\""+(ck?" checked":"")+"> "+MODULE_LABELS[m]+"</label>";});h+="</div>";}h+="<div class=\"rq-act\"><button class=\"mini ok\" data-act=\"saveaccess\">Save Access</button><button class=\"mini\" data-act=\"resetpass\">Reset password</button><button class=\"mini no\" data-act=\"deluser\">Delete</button></div></li>";});h+="</ul><div class=\"adm-note\">Access is shared across every device via the Google backend. \u201cSave Access\u201d updates that user's role &amp; module permissions instantly \u2014 they'll see only the allowed tools after their next login.</div>";body.innerHTML=h;adminDlg.style.display="flex";var cCreate=document.getElementById("cCreate");if(cCreate)cCreate.addEventListener("click",createUser);body.querySelectorAll("[data-act]").forEach(function(btn){btn.addEventListener("click",function(){var li=btn.closest("li"),idx=li?li.getAttribute("data-i"):null,em=li?li.getAttribute("data-em"):btn.getAttribute("data-em"),act=btn.getAttribute("data-act");if(act==="grant"){var r=REQS[idx];var rs=li.querySelector(".grant-role");grantAccess(r.email,r.name,r.section,rs?rs.value:"operator",function(){r.done=true;saveReqs();afterMutation();});}else if(act==="grantpass"){var r2=REQS[idx];resetUser(r2.email,function(){r2.done=true;saveReqs();afterMutation();});}else if(act==="deny"){var r3=REQS[idx];if(r3){REQS=REQS.filter(function(x){return x!==r3;});saveReqs();backend({action:"removeRequest",email:r3.email},function(){});afterMutation();}}else if(act==="resetpass"){resetUser(em,afterMutation);}else if(act==="deluser"){deleteUser(em,afterMutation);}else if(act==="saveaccess"){var role=li.querySelector(".u-role").value;var perms=[];li.querySelectorAll(".perm-checks input:checked").forEach(function(cb){perms.push(cb.getAttribute("data-mod"));});saveAccess(em,role,perms,afterMutation);}});});}
+  function createUser(){var nm=(document.getElementById("cName").value||"").trim(),em=(document.getElementById("cEmail").value||"").trim().toLowerCase(),role=document.getElementById("cRole").value,sec=document.getElementById("cSection").value;if(!nm||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){alert("Enter a name and a valid email address.");return;}if(findUser(em)){alert("This email already has an account.");return;}var pass=makePass();sha256Hex(pass).then(function(h){if(USING_BACKEND){backend({action:"upsert",email:em,name:nm,role:role,section:sec||"",hash:h,perms:ROLE_PERMS[role]||[]},function(j){if(!j){alert("Backend error \u2014 account not saved. Check the Apps Script deployment.");return;}alert("Account created.\nLogin ID: "+em+"\nPassword: "+pass);afterMutation();});}else{EXUSERS[em]={name:nm,role:role,section:sec||"",hash:h};saveUsers();alert("Account created.\nLogin ID: "+em+"\nPassword: "+pass);afterMutation();}});}
+  function grantAccess(em,nm,sec,role,cb){var pass=makePass();sha256Hex(pass).then(function(h){if(USING_BACKEND){backend({action:"upsert",email:em,name:nm||em,role:role||"operator",section:sec||"",hash:h,perms:ROLE_PERMS[role]||[]},function(j){if(!j){alert("Backend error \u2014 account not saved.");return;}backend({action:"removeRequest",email:em},function(){});alert("Account created for "+em+".\nLogin ID: "+em+"\nPassword: "+pass);if(cb)cb();});}else{EXUSERS[em]={name:nm||em,role:role||"operator",section:sec||"",hash:h};saveUsers();alert("Account created for "+em+".\nLogin ID: "+em+"\nPassword: "+pass);if(cb)cb();}});}
+  function resetUser(em,cb){var u=findUser(em),pass=makePass();sha256Hex(pass).then(function(h){if(USING_BACKEND){backend({action:"resetpass",email:em,hash:h},function(j){if(!j){alert("Backend error \u2014 password not reset.");return;}alert("Password reset for "+em+".\nNew temporary password: "+pass);if(cb)cb();});}else{if(u)EXUSERS[em]={name:u.name,role:u.role,section:u.section||"",hash:h};else if(EXUSERS[em])EXUSERS[em].hash=h;saveUsers();alert("Password reset for "+em+".\nNew temporary password: "+pass);if(cb)cb();}});}
+  function saveAccess(em,role,perms,cb){var u=findUser(em);var rec={email:em,name:u?u.name:em,role:role,section:u?(u.section||""):"",hash:u?(u.hash||""):"",perms:perms};if(USING_BACKEND){backend({action:"upsert",email:rec.email,name:rec.name,role:rec.role,section:rec.section,hash:rec.hash,perms:rec.perms},function(j){if(!j){alert("Backend error \u2014 access not saved.");return;}if(cb)cb();});}else{EXUSERS[em]={name:rec.name,role:rec.role,section:rec.section,hash:rec.hash,perms:rec.perms};saveUsers();if(cb)cb();}}
+  function deleteUser(em,cb){if(!confirm("Delete user "+em+"? This cannot be undone."))return;if(USING_BACKEND){backend({action:"deluser",email:em},function(j){if(!j){alert("Backend error \u2014 user not deleted.");return;}if(cb)cb();});}else{delete EXUSERS[em];saveUsers();if(cb)cb();}}
+  if(adminBtn)adminBtn.addEventListener("click",openAdmin);
+  if(admClose)admClose.addEventListener("click",function(){adminDlg.style.display="none";});
+  window.addEventListener("storage",function(ev){if(ev.key==="abc_access_requests"||ev.key==="abc_extra_users"||ev.key==="abc_login_v1"){reloadStore();if(SESSION&&SESSION.role==="admin")renderAdminBtn();}});
+  setInterval(function(){if(SESSION&&SESSION.role==="admin")renderAdminBtn();},3000);
+  document.addEventListener("change",function(e){if(e.target&&e.target.classList&&e.target.classList.contains("u-role")){var li=e.target.closest("li"),role=e.target.value;if(role!=="admin"){var def=ROLE_PERMS[role]||MODULES.slice();li.querySelectorAll(".perm-checks input").forEach(function(cb){cb.checked=def.indexOf(cb.getAttribute("data-mod"))!==-1;});}}});
+  pullServer();
+  applySession();
+})();
+</script>
+
+<script>
+(function(){
+  /* ───── Cinematic loader ───── */
+  var ov=document.getElementById('loading-overlay');
+  var pc=document.getElementById('loader-particles');
+  var colors=['#4a86e8','#7db8ff','#fbbf24','#1f6feb','#b9cdf5'];
+  for(var i=0;i<24;i++){
+    var d=document.createElement('div');
+    var size=Math.random()*2.5+1;
+    d.style.cssText='position:absolute;width:'+size+'px;height:'+size+'px;border-radius:50%;background:'+colors[Math.floor(Math.random()*colors.length)]+';opacity:'+(Math.random()*.4+.1)+';left:'+(Math.random()*100)+'%;top:'+(Math.random()*100)+'%;animation:loaderFloat '+(3+Math.random()*4)+'s ease-in-out infinite '+(Math.random()*4)+'s;';
+    pc.appendChild(d);
+  }
+  var msgs=['Starting session…','Building tools & shortcuts…','Connecting to shared login…','Reading access permissions…','Almost ready…'];
+  var idx=0,el=document.getElementById('loader-status');
+  var iv=setInterval(function(){
+    idx=(idx+1)%msgs.length;
+    el.style.opacity='0';
+    setTimeout(function(){el.textContent=msgs[idx];el.style.transition='opacity .4s';el.style.opacity='1';},200);
+  },1300);
+  function done(){clearInterval(iv);ov.classList.add('fade-out');setTimeout(function(){if(ov.parentNode)ov.parentNode.removeChild(ov);},750);}
+  setTimeout(done,2100);      /* minimum splash time */
+  setTimeout(done,15000);     /* safety net */
+
+  /* ───── Live date + clock + refresh ───── */
+  var dEl=document.getElementById('currentDate'),cEl=document.getElementById('liveClock');
+  var M=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  function tick(){
+    var d=new Date();
+    dEl.textContent=d.getDate()+' '+M[d.getMonth()]+' '+d.getFullYear();
+    var h=d.getHours(),m=d.getMinutes(),s=d.getSeconds();
+    cEl.textContent=(h<10?'0':'')+h+':'+(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+  }
+  tick();
+  setInterval(tick,1000);
+  var rb=document.getElementById('refreshBtn');
+  if(rb)rb.addEventListener('click',function(){location.reload();});
+
+  /* ───── Per-card FX: top accent bar + glow blob coloured by badge ───── */
+  document.querySelectorAll('.entry-card').forEach(function(card){
+    var badge=card.querySelector('.badge');
+    var col='#1f6feb';
+    var st=badge?badge.getAttribute('style')||'':'';var m=st.match(/background\s*:\s*(#[0-9a-fA-F]{3,6})/);
+    if(m)col=m[1];
+    var tb=document.createElement('div');tb.className='card-top-bar';
+    tb.style.background='linear-gradient(90deg,'+col+' 0%,#ffffff 50%,'+col+' 100%)';
+    tb.style.backgroundSize='200% auto';
+    var blob=document.createElement('div');blob.className='card-blob';blob.style.background=col;
+    card.appendChild(tb);card.appendChild(blob);
+  });
+})();
+</script>
+</body>
+</html>
