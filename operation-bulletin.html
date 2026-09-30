@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Operation Bulletin â€” ABC Textile</title>
+<title>Operation Bulletin — ABC Textile</title>
 <style>
   :root{
     --ink:#1c2126; --paper:#f4f6fb; --card:#ffffff; --line:#dfe4f0;
@@ -31,7 +31,7 @@
   .gchip.on{background:var(--accent-dark);border-color:var(--accent-dark);color:#fff;}
   .card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 8px 24px -14px rgba(20,63,143,.25);}
   table{width:100%;border-collapse:collapse;font-size:13px;}
-  thead th{background:var(--accent-dark);color:#fff;text-align:left;padding:11px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;cursor:pointer;}
+  thead th{background:var(--accent-dark);color:#fff;text-align:left;padding:11px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
   thead th.r,td.r{text-align:right;}
   tbody td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
   tbody tr:last-child td{border-bottom:none;}
@@ -49,7 +49,7 @@
 <body>
 <div class="header">
   <div class="header-inner">
-    <div class="eyebrow">Operational Excellence â€” ABC Textile</div>
+    <div class="eyebrow">Operational Excellence — ABC Textile</div>
     <h1>Operation Bulletin</h1>
     <p>Searchable operation / SMV bulletin by SKU name or item code.</p>
   </div>
@@ -58,7 +58,7 @@
   <div class="search-row">
     <div class="searchbox">
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input id="q" type="text" placeholder="Search SKU name or item codeâ€¦" autocomplete="off">
+      <input id="q" type="text" placeholder="Search SKU name or item code…" autocomplete="off">
     </div>
     <span class="count" id="count"></span>
   </div>
@@ -75,7 +75,7 @@
     </table>
     <div class="empty" id="empty" style="display:none">No items match your search.</div>
   </div>
-  <p class="signature">Operation Bulletin â€” ABC Textile Â· Operational Excellence</p>
+  <p class="signature">Operation Bulletin — ABC Textile · Operational Excellence</p>
 </div>
 <script id="bulletin-data" type="application/json">[
     {
@@ -1101,7 +1101,7 @@ function render(){
       <td><span class="sec ${i.section.toLowerCase()}">${i.section}</span></td>
       <td class="grp">${i.group}</td>
       <td class="name">${i.name}</td>
-      <td class="r smv">${i.smv || 'â€”'}</td>
+      <td class="r smv">${i.smv || '—'}</td>
     </tr>`).join('');
   document.getElementById('empty').style.display = rows.length ? 'none' : 'block';
 }
