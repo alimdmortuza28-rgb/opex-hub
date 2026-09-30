@@ -3,39 +3,45 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Operation Bulletin — ABC Textile</title>
+<title>Operation Bulletin â€” ABC Textile</title>
 <style>
   :root{
     --ink:#1c2126; --paper:#f4f6fb; --card:#ffffff; --line:#dfe4f0;
-    --accent:#1f6feb; --accent-dark:#143f8f; --muted:#62677a; --warn:#c85c3c;
+    --accent:#1f6feb; --accent-dark:#143f8f; --muted:#62677a;
+    --gss:#2563eb; --led:#d97706; --hap:#0e9f7a;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   body{font-family:'Segoe UI',Helvetica,Arial,sans-serif;background:var(--paper);color:var(--ink);padding-bottom:60px;}
   .header{background:var(--accent-dark);color:#fff;padding:26px 16px 30px;}
-  .header-inner{max-width:960px;margin:0 auto;}
+  .header-inner{max-width:1000px;margin:0 auto;}
   .eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:11px;opacity:.75;margin-bottom:6px;}
   .header h1{margin:0 0 6px;font-size:24px;}
   .header p{margin:0;font-size:13px;opacity:.9;}
-  .wrap{max-width:960px;margin:0 auto;padding:0 16px;}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 16px;}
   .search-row{display:flex;gap:10px;align-items:center;margin:18px 0 12px;flex-wrap:wrap;}
   .searchbox{flex:1;min-width:220px;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 14px;}
   .searchbox input{flex:1;border:0;outline:0;font-size:14px;font-family:inherit;background:transparent;color:var(--ink);}
   .searchbox input::placeholder{color:#9aa3b2;}
   .count{font-size:12px;color:var(--muted);}
-  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
   .chip{background:#fff;border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;}
   .chip.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .gchips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+  .gchip{background:#eef1f8;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:5px 11px;font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;}
+  .gchip.on{background:var(--accent-dark);border-color:var(--accent-dark);color:#fff;}
   .card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 8px 24px -14px rgba(20,63,143,.25);}
   table{width:100%;border-collapse:collapse;font-size:13px;}
-  thead th{background:var(--accent-dark);color:#fff;text-align:left;padding:11px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
+  thead th{background:var(--accent-dark);color:#fff;text-align:left;padding:11px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;cursor:pointer;}
   thead th.r,td.r{text-align:right;}
-  tbody td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tbody td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
   tbody tr:last-child td{border-bottom:none;}
   tbody tr:hover{background:#f7f9ff;}
   .code{color:var(--accent);font-weight:700;white-space:nowrap;}
-  .grp{display:inline-block;background:#eef1f8;color:var(--accent-dark);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;}
+  .sec{display:inline-block;border-radius:6px;padding:2px 9px;font-size:11px;font-weight:800;color:#fff;letter-spacing:.02em;}
+  .sec.gss{background:var(--gss);} .sec.led{background:var(--led);} .sec.hap{background:var(--hap);}
+  .grp{color:var(--muted);font-size:12px;}
+  .name{font-weight:600;}
   .smv{font-weight:800;color:var(--accent-dark);font-variant-numeric:tabular-nums;white-space:nowrap;}
-  .cap{font-variant-numeric:tabular-nums;}
   .empty{text-align:center;padding:40px 20px;color:var(--muted);}
   .signature{text-align:center;font-size:11.5px;color:var(--muted);margin-top:24px;}
 </style>
@@ -43,7 +49,7 @@
 <body>
 <div class="header">
   <div class="header-inner">
-    <div class="eyebrow">Operational Excellence — ABC Textile</div>
+    <div class="eyebrow">Operational Excellence â€” ABC Textile</div>
     <h1>Operation Bulletin</h1>
     <p>Searchable operation / SMV bulletin by SKU name or item code.</p>
   </div>
@@ -52,88 +58,1053 @@
   <div class="search-row">
     <div class="searchbox">
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input id="q" type="text" placeholder="Search SKU name or item code…" autocomplete="off">
+      <input id="q" type="text" placeholder="Search SKU name or item codeâ€¦" autocomplete="off">
     </div>
     <span class="count" id="count"></span>
   </div>
   <div class="chips" id="chips"></div>
+  <div class="gchips" id="gchips"></div>
   <div class="card">
     <table>
       <thead>
         <tr>
-          <th>Item Code</th><th>Group</th><th>Item Name</th>
-          <th class="r">Cycle Time (s)</th><th class="r">Count</th>
-          <th class="r">Capacity (Pcs/Hr)</th><th class="r">SMV (min)</th>
+          <th>Item Code</th><th>Section</th><th>Group</th><th>Item Name</th><th class="r">SMV (min)</th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
     </table>
     <div class="empty" id="empty" style="display:none">No items match your search.</div>
   </div>
-  <p class="signature">Operation Bulletin — ABC Textile · Operational Excellence</p>
+  <p class="signature">Operation Bulletin â€” ABC Textile Â· Operational Excellence</p>
 </div>
+<script id="bulletin-data" type="application/json">[
+    {
+        "code":  "14414947",
+        "name":  "ENOVAR CRYSTAL SS DOUBLE BURNER (NG)",
+        "section":  "HAP",
+        "group":  "gas stove",
+        "smv":  "1.27535"
+    },
+    {
+        "code":  "14414934",
+        "name":  "ENOVAR FLARE HOB DOUBLE BURNER",
+        "section":  "HAP",
+        "group":  "gas stove",
+        "smv":  "1.49477"
+    },
+    {
+        "code":  "14414379",
+        "name":  "ENOVAR SP MCB 06A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "1.49477"
+    },
+    {
+        "code":  "14414380",
+        "name":  "ENOVAR SP MCB 10A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "1.49477"
+    },
+    {
+        "code":  "14414381",
+        "name":  "ENOVAR SP MCB 16A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "1.49477"
+    },
+    {
+        "code":  "14414382",
+        "name":  "ENOVAR SP MCB 20A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "1.49477"
+    },
+    {
+        "code":  "14414383",
+        "name":  "ENOVAR SP MCB 25A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "1.49477"
+    },
+    {
+        "code":  "14414384",
+        "name":  "ENOVAR SP MCB 32A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "1.49477"
+    },
+    {
+        "code":  "14414385",
+        "name":  "ENOVAR SP MCB 40A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "1.829995"
+    },
+    {
+        "code":  "14414386",
+        "name":  "ENOVAR SP MCB 50A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "1.829995"
+    },
+    {
+        "code":  "14414387",
+        "name":  "ENOVAR SP MCB 63A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "1.829995"
+    },
+    {
+        "code":  "14414388",
+        "name":  "ENOVAR DP MCB 6A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "2.98954"
+    },
+    {
+        "code":  "14414389",
+        "name":  "ENOVAR DP MCB 10A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "2.98954"
+    },
+    {
+        "code":  "14414390",
+        "name":  "ENOVAR DP MCB 16 A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "2.98954"
+    },
+    {
+        "code":  "14414391",
+        "name":  "ENOVAR DP MCB 20A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "2.98954"
+    },
+    {
+        "code":  "14414392",
+        "name":  "ENOVAR DP MCB 25A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "2.98954"
+    },
+    {
+        "code":  "14414393",
+        "name":  "ENOVAR DP MCB 32A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "2.98954"
+    },
+    {
+        "code":  "14414394",
+        "name":  "ENOVAR DP MCB 40A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "3.65999"
+    },
+    {
+        "code":  "14414395",
+        "name":  "ENOVAR DP MCB 50A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "3.65999"
+    },
+    {
+        "code":  "14414396",
+        "name":  "ENOVAR DP MCB 63A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "3.65999"
+    },
+    {
+        "code":  "14414397",
+        "name":  "ENOVAR TP MCB 06 A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "4.982566667"
+    },
+    {
+        "code":  "14414398",
+        "name":  "ENOVAR TP MCB 10 A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "4.982566667"
+    },
+    {
+        "code":  "14414399",
+        "name":  "ENOVAR TP MCB 16 A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "4.982566667"
+    },
+    {
+        "code":  "14414400",
+        "name":  "ENOVAR TP MCB 20 A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "4.982566667"
+    },
+    {
+        "code":  "14414401",
+        "name":  "ENOVAR TP MCB 25 A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "4.982566667"
+    },
+    {
+        "code":  "14414402",
+        "name":  "ENOVAR TP MCB 32 A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "4.982566667"
+    },
+    {
+        "code":  "14414403",
+        "name":  "ENOVAR TP MCB 40A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "5.489985"
+    },
+    {
+        "code":  "14414404",
+        "name":  "ENOVAR TP MCB 50A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "5.489985"
+    },
+    {
+        "code":  "14414405",
+        "name":  "ENOVAR TP MCB 63A 03KA",
+        "section":  "GSS",
+        "group":  "mcb",
+        "smv":  "5.489985"
+    },
+    {
+        "code":  "14414546",
+        "name":  "ENOVAR AC BRACKET TUBE 10W DL",
+        "section":  "LED",
+        "group":  "bracket tube",
+        "smv":  "3.50313"
+    },
+    {
+        "code":  "14414551",
+        "name":  "ENOVAR AC BRACKET TUBE 10W WC",
+        "section":  "LED",
+        "group":  "bracket tube",
+        "smv":  "3.50313"
+    },
+    {
+        "code":  "14414549",
+        "name":  "ENOVAR AC BRACKET TUBE 60W DL",
+        "section":  "LED",
+        "group":  "bracket tube",
+        "smv":  "4.29111"
+    },
+    {
+        "code":  "14414554",
+        "name":  "ENOVAR AC BRACKET TUBE 60W WC",
+        "section":  "LED",
+        "group":  "bracket tube",
+        "smv":  "4.29111"
+    },
+    {
+        "code":  "14414550",
+        "name":  "ENOVAR AC BRACKET TUBE 80W DL",
+        "section":  "LED",
+        "group":  "bracket tube",
+        "smv":  "4.48017"
+    },
+    {
+        "code":  "14414555",
+        "name":  "ENOVAR AC BRACKET TUBE 80W WC",
+        "section":  "LED",
+        "group":  "bracket tube",
+        "smv":  "4.48017"
+    },
+    {
+        "code":  "14414580",
+        "name":  "ENOVAR HIGH WATT LED 70W B22 DL",
+        "section":  "LED",
+        "group":  "high watt led",
+        "smv":  "1.812610833"
+    },
+    {
+        "code":  "14414581",
+        "name":  "ENOVAR HIGH WATT LED 70W E27 DL",
+        "section":  "LED",
+        "group":  "high watt led",
+        "smv":  "1.812610833"
+    },
+    {
+        "code":  "14414588",
+        "name":  "ENOVAR HIGH WATT LED 70W B22 WC",
+        "section":  "LED",
+        "group":  "high watt led",
+        "smv":  "1.812610833"
+    },
+    {
+        "code":  "14414589",
+        "name":  "ENOVAR HIGH WATT LED 70W E27 WC",
+        "section":  "LED",
+        "group":  "high watt led",
+        "smv":  "1.812610833"
+    },
+    {
+        "code":  "14414516",
+        "name":  "ENOVAR AC LED BULB 5W B22 DL",
+        "section":  "LED",
+        "group":  "regular led bulb",
+        "smv":  "0.55131"
+    },
+    {
+        "code":  "14414528",
+        "name":  "ENOVAR AC LED BULB 5W B22 WC",
+        "section":  "LED",
+        "group":  "regular led bulb",
+        "smv":  "0.55131"
+    },
+    {
+        "code":  "14414517",
+        "name":  "ENOVAR AC LED BULB 5W E27 DL",
+        "section":  "LED",
+        "group":  "regular led bulb",
+        "smv":  "0.55131"
+    },
+    {
+        "code":  "14414529",
+        "name":  "ENOVAR AC LED BULB 5W E27 WC",
+        "section":  "LED",
+        "group":  "regular led bulb",
+        "smv":  "0.55131"
+    },
+    {
+        "code":  "14414518",
+        "name":  "ENOVAR AC LED BULB 7W B22 DL",
+        "section":  "LED",
+        "group":  "regular led bulb",
+        "smv":  "0.55131"
+    },
+    {
+        "code":  "14414530",
+        "name":  "ENOVAR AC LED BULB 7W B22 DL",
+        "section":  "LED",
+        "group":  "regular led bulb",
+        "smv":  "0.55131"
+    },
+    {
+        "code":  "14414519",
+        "name":  "ENOVAR AC LED BULB 7W E27 DL",
+        "section":  "LED",
+        "group":  "regular led bulb",
+        "smv":  "0.55131"
+    },
+    {
+        "code":  "14414531",
+        "name":  "ENOVAR AC LED BULB 7W E27 WC",
+        "section":  "LED",
+        "group":  "regular led bulb",
+        "smv":  "0.55131"
+    },
+    {
+        "code":  "14414520",
+        "name":  "ENOVAR AC LED BULB 9W B22 DL",
+        "section":  "LED",
+        "group":  "regular led bulb",
+        "smv":  "0.55131"
+    },
+    {
+        "code":  "14414532",
+        "name":  "ENOVAR AC LED BULB 9W B22 WC",
+        "section":  "LED",
+        "group":  "regular led bulb",
+        "smv":  "0.55131"
+    },
+    {
+        "code":  "14414521",
+        "name":  "ENOVAR AC LED BULB 9W E27 DL",
+        "section":  "LED",
+        "group":  "regular led bulb",
+        "smv":  "0.55131"
+    },
+    {
+        "code":  "14414533",
+        "name":  "ENOVAR AC LED BULB 9W E27 WC",
+        "section":  "LED",
+        "group":  "regular led bulb",
+        "smv":  "0.55131"
+    },
+    {
+        "code":  "14414534",
+        "name":  "ENOVAR AC LED BULB 12W B22 WC",
+        "section":  "LED",
+        "group":  "ac/dc bulb",
+        "smv":  "2.014953333"
+    },
+    {
+        "code":  "14414535",
+        "name":  "ENOVAR AC LED BULB 12W E27 WC",
+        "section":  "LED",
+        "group":  "ac/dc bulb",
+        "smv":  "2.014953333"
+    },
+    {
+        "code":  "14414522",
+        "name":  "ENOVAR AC LED BULB 12W B22 DL",
+        "section":  "LED",
+        "group":  "ac/dc bulb",
+        "smv":  "0.68034"
+    },
+    {
+        "code":  "14414523",
+        "name":  "ENOVAR AC LED BULB 12W E27 DL",
+        "section":  "LED",
+        "group":  "ac/dc bulb",
+        "smv":  "0.68034"
+    },
+    {
+        "code":  "14414524",
+        "name":  "ENOVAR AC LED BULB 15W B22 DL",
+        "section":  "LED",
+        "group":  "ac/dc bulb",
+        "smv":  "0.68034"
+    },
+    {
+        "code":  "14414525",
+        "name":  "ENOVAR AC LED BULB 15W E27 DL",
+        "section":  "LED",
+        "group":  "ac/dc bulb",
+        "smv":  "0.68034"
+    },
+    {
+        "code":  "14414536",
+        "name":  "ENOVAR AC LED BULB 15W B22 WC",
+        "section":  "LED",
+        "group":  "ac/dc bulb",
+        "smv":  "2.014953333"
+    },
+    {
+        "code":  "14414537",
+        "name":  "ENOVAR AC LED BULB 15W E27 WC",
+        "section":  "LED",
+        "group":  "ac/dc bulb",
+        "smv":  "2.014953333"
+    },
+    {
+        "code":  "14414526",
+        "name":  "ENOVAR AC LED BULB 18W B22 DL",
+        "section":  "LED",
+        "group":  "ac/dc bulb",
+        "smv":  "0.68034"
+    },
+    {
+        "code":  "14414527",
+        "name":  "ENOVAR AC LED BULB 18W E27 DL",
+        "section":  "LED",
+        "group":  "ac/dc bulb",
+        "smv":  "2.014953333"
+    },
+    {
+        "code":  "14414538",
+        "name":  "ENOVAR AC LED BULB 18W B22 WC",
+        "section":  "LED",
+        "group":  "ac/dc bulb",
+        "smv":  "2.014953333"
+    },
+    {
+        "code":  "14414539",
+        "name":  "ENOVAR AC LED BULB 18W E27 WC",
+        "section":  "LED",
+        "group":  "ac/dc bulb",
+        "smv":  "2.014953333"
+    },
+    {
+        "code":  "14414600",
+        "name":  "ENOVAR EXHAUST FAN - 6 INCH",
+        "section":  "LED",
+        "group":  "exhaust fan",
+        "smv":  "5.329492917"
+    },
+    {
+        "code":  "14414601",
+        "name":  "ENOVAR EXHAUST FAN - 8 INCH",
+        "section":  "LED",
+        "group":  "exhaust fan",
+        "smv":  "5.329492917"
+    },
+    {
+        "code":  "14414602",
+        "name":  "ENOVAR EXHAUST FAN - 10 INCH",
+        "section":  "LED",
+        "group":  "exhaust fan",
+        "smv":  "5.38749125"
+    },
+    {
+        "code":  "14414603",
+        "name":  "ENOVAR EXHAUST FAN - 12 INCH",
+        "section":  "LED",
+        "group":  "exhaust fan",
+        "smv":  "5.38749125"
+    },
+    {
+        "code":  "14414779",
+        "name":  "ENOVAR AC/DC LED 6W BULB B22",
+        "section":  "LED",
+        "group":  "ac/dc bulb",
+        "smv":  "1.940084074"
+    },
+    {
+        "code":  "14414780",
+        "name":  "ENOVAR AC/DC LED 6W BULB E27",
+        "section":  "LED",
+        "group":  "ac/dc bulb",
+        "smv":  "1.940084074"
+    },
+    {
+        "code":  "14414544",
+        "name":  "ENOVAR AC/DC LED 18W BULB B22",
+        "section":  "LED",
+        "group":  "ac/dc bulb",
+        "smv":  "2.428761667"
+    },
+    {
+        "code":  "14414545",
+        "name":  "ENOVAR AC/DC LED 18W BULB E27",
+        "section":  "LED",
+        "group":  "ac/dc bulb",
+        "smv":  "2.428761667"
+    },
+    {
+        "code":  "14414376",
+        "name":  "ENOVAR 4-6 WAY METAL DISTRIBUTION BOX",
+        "section":  "LED",
+        "group":  "db",
+        "smv":  "0.482885"
+    },
+    {
+        "code":  "14414378",
+        "name":  "ENOVAR 10-13 WAY METAL DISTRIBUTION BOX",
+        "section":  "LED",
+        "group":  "db",
+        "smv":  "0.482885"
+    },
+    {
+        "code":  "14414378",
+        "name":  "ENOVAR 10-13 WAY METAL DISTRIBUTION BOX",
+        "section":  "LED",
+        "group":  "db",
+        "smv":  "0.482885"
+    },
+    {
+        "code":  "14414526",
+        "name":  "ENOVAR DOWN PANEL ROUND 5W DL",
+        "section":  "LED",
+        "group":  "down panel",
+        "smv":  "0.68034"
+    },
+    {
+        "code":  "14414525",
+        "name":  "ENOVAR DOWN PANEL ROUND 5W WC",
+        "section":  "LED",
+        "group":  "down panel",
+        "smv":  "0.68034"
+    },
+    {
+        "code":  "14414524",
+        "name":  "ENOVAR DOWN PANEL ROUND 5W RED",
+        "section":  "LED",
+        "group":  "down panel",
+        "smv":  "0.68034"
+    },
+    {
+        "code":  "14414523",
+        "name":  "ENOVAR DOWN PANEL ROUND 5W GREEN",
+        "section":  "LED",
+        "group":  "down panel",
+        "smv":  "0.68034"
+    },
+    {
+        "code":  "14414522",
+        "name":  "ENOVAR DOWN PANEL ROUND 5W BLUE",
+        "section":  "LED",
+        "group":  "down panel",
+        "smv":  "0.68034"
+    },
+    {
+        "code":  "14414556",
+        "name":  "ENOVAR DOWN PANEL ROUND 7W DL",
+        "section":  "LED",
+        "group":  "down panel",
+        "smv":  "0.68034"
+    },
+    {
+        "code":  "14414557",
+        "name":  "ENOVAR DOWN PANEL ROUND 7W WC",
+        "section":  "LED",
+        "group":  "down panel",
+        "smv":  "0.68034"
+    },
+    {
+        "code":  "14414558",
+        "name":  "ENOVAR DOWN PANEL ROUND 7W RED",
+        "section":  "LED",
+        "group":  "down panel",
+        "smv":  "0.68034"
+    },
+    {
+        "code":  "14414559",
+        "name":  "ENOVAR DOWN PANEL ROUND 7W GREEN",
+        "section":  "LED",
+        "group":  "down panel",
+        "smv":  "0.68034"
+    },
+    {
+        "code":  "14414560",
+        "name":  "ENOVAR DOWN PANEL ROUND 7W BLUE",
+        "section":  "LED",
+        "group":  "down panel",
+        "smv":  "0.68034"
+    },
+    {
+        "code":  "14414567",
+        "name":  "ENOVAR PANEL CONCEAL ROUND 12W DL",
+        "section":  "LED",
+        "group":  "regular panel",
+        "smv":  "0.9129393833"
+    },
+    {
+        "code":  "14414571",
+        "name":  "ENOVAR PANEL CONCEAL ROUND 18W DL",
+        "section":  "LED",
+        "group":  "regular panel",
+        "smv":  "0.9129393833"
+    },
+    {
+        "code":  "14414565",
+        "name":  "ENOVAR PANEL SURFACE ROUND 12W DL",
+        "section":  "LED",
+        "group":  "regular panel",
+        "smv":  "2.47894"
+    },
+    {
+        "code":  "14414569",
+        "name":  "ENOVAR PANEL SURFACE ROUND 18W DL",
+        "section":  "LED",
+        "group":  "regular panel",
+        "smv":  "2.47894"
+    },
+    {
+        "code":  "14414369",
+        "name":  "ENOVAR CONCEALED BOX - PLASTIC",
+        "section":  "GSS",
+        "group":  "holder accessories",
+        "smv":  "0.3160583333"
+    },
+    {
+        "code":  "14414590",
+        "name":  "ENOVAR FLOOD LIGHT 30W DL",
+        "section":  "LED",
+        "group":  "flood light",
+        "smv":  "13.00857"
+    },
+    {
+        "code":  "14414595",
+        "name":  "ENOVAR FLOOD LIGHT 30W WC",
+        "section":  "LED",
+        "group":  "flood light",
+        "smv":  "13.00857"
+    },
+    {
+        "code":  "14414591",
+        "name":  "ENOVAR FLOOD LIGHT 50W DL",
+        "section":  "LED",
+        "group":  "flood light",
+        "smv":  "13.00857"
+    },
+    {
+        "code":  "14414596",
+        "name":  "ENOVAR FLOOD LIGHT 50W WC",
+        "section":  "LED",
+        "group":  "flood light",
+        "smv":  "13.00857"
+    },
+    {
+        "code":  "14414373",
+        "name":  "ENOVAR EXTENSION SOCKET WITH SWITCH - 5S",
+        "section":  "GSS",
+        "group":  "extension socket",
+        "smv":  "14.72040889"
+    },
+    {
+        "code":  "14414493",
+        "name":  "ENOVAR LUMIGOLD 5 PIN MULTI SOCKET WITH SWITCH 13A",
+        "section":  "GSS",
+        "group":  "gss lumigold",
+        "smv":  "1.72776"
+    },
+    {
+        "code":  "14414363",
+        "name":  "ENOVAR ROUND CEILING ROSE",
+        "section":  "GSS",
+        "group":  "holder accessories",
+        "smv":  "0.79672"
+    },
+    {
+        "code":  "14414358",
+        "name":  "ENOVAR OCTAGONAL CEILING ROSE",
+        "section":  "GSS",
+        "group":  "holder accessories",
+        "smv":  "1.345653333"
+    },
+    {
+        "code":  "14414359",
+        "name":  "ENOVAR PENDENT HOLDER B22",
+        "section":  "GSS",
+        "group":  "holder accessories",
+        "smv":  "1.197763333"
+    },
+    {
+        "code":  "14414360",
+        "name":  "ENOVAR PENDENT HOLDER E27",
+        "section":  "GSS",
+        "group":  "holder accessories",
+        "smv":  "1.197763333"
+    },
+    {
+        "code":  "14414361",
+        "name":  "ENOVAR ROUND BATTEN HOLDER B22",
+        "section":  "GSS",
+        "group":  "holder accessories",
+        "smv":  "1.197763333"
+    },
+    {
+        "code":  "14414362",
+        "name":  "ENOVAR ROUND BATTEN HOLDER E27",
+        "section":  "GSS",
+        "group":  "holder accessories",
+        "smv":  "1.197763333"
+    },
+    {
+        "code":  "14414357",
+        "name":  "ENOVAR OCTAGONAL HOLDER E27",
+        "section":  "GSS",
+        "group":  "holder accessories",
+        "smv":  "3.33523"
+    },
+    {
+        "code":  "14414356",
+        "name":  "ENOVAR OCTAGONAL HOLDER B22",
+        "section":  "GSS",
+        "group":  "holder accessories",
+        "smv":  "3.33523"
+    },
+    {
+        "code":  "14414366",
+        "name":  "ENOVAR 2 PIN PLUG 10A",
+        "section":  "GSS",
+        "group":  "holder accessories",
+        "smv":  "1.1926266666666665"
+    },
+    {
+        "code":  "14414368",
+        "name":  "ENOVAR 3 PIN ROUND PLUG 20A",
+        "section":  "GSS",
+        "group":  "holder accessories",
+        "smv":  "1.331355"
+    },
+    {
+        "code":  "14414367",
+        "name":  "ENOVAR 3 PIN FLAT PLUG 13A",
+        "section":  "GSS",
+        "group":  "holder accessories",
+        "smv":  "1.354163333"
+    },
+    {
+        "code":  "14414349",
+        "name":  "ENOVAR PIANO ONE WAY SWITCH 6A",
+        "section":  "GSS",
+        "group":  "pc",
+        "smv":  "1.71856"
+    },
+    {
+        "code":  "14414352",
+        "name":  "ENOVAR PIANO 2 PIN SOCKET 5A",
+        "section":  "GSS",
+        "group":  "pc",
+        "smv":  "1.925253333"
+    },
+    {
+        "code":  "14414355",
+        "name":  "ENOVAR PIANO FAN DIMMER 200W",
+        "section":  "GSS",
+        "group":  "pc",
+        "smv":  "2.43938"
+    },
+    {
+        "code":  "14414354",
+        "name":  "ENOVAR PIANO INDICATOR",
+        "section":  "GSS",
+        "group":  "pc",
+        "smv":  "1.876876667"
+    },
+    {
+        "code":  "14414353",
+        "name":  "ENOVAR PIANO FUSE 5A",
+        "section":  "GSS",
+        "group":  "pc",
+        "smv":  "2.007785"
+    },
+    {
+        "code":  "14414785",
+        "name":  "ENOVAR CHERRY DP SWITCH WITH NEON 32A",
+        "section":  "GSS",
+        "group":  "gss cherry",
+        "smv":  "2.173145417"
+    },
+    {
+        "code":  "14414418",
+        "name":  "ENOVAR CHERRY FAN REGULATOR 500W",
+        "section":  "GSS",
+        "group":  "gss cherry",
+        "smv":  "6.548598333"
+    },
+    {
+        "code":  "14414423",
+        "name":  "ENOVAR CHERRY 5 PIN MULTI SOCKET WITH SWITCH 13A",
+        "section":  "GSS",
+        "group":  "gss cherry",
+        "smv":  "2.00192"
+    },
+    {
+        "code":  "14414412",
+        "name":  "ENOVAR CHERRY TWO GANG ONE WAY SWITCH 16A",
+        "section":  "GSS",
+        "group":  "gss cherry",
+        "smv":  "1.360028333"
+    },
+    {
+        "code":  "14414416",
+        "name":  "ENOVAR CHERRY TWO GANG TWO WAY SWITCH 16A",
+        "section":  "GSS",
+        "group":  "gss cherry",
+        "smv":  "1.360028333"
+    },
+    {
+        "code":  "14414415",
+        "name":  "ENOVAR ONYX ONE GANG TWO WAY SWITCH 16A",
+        "section":  "GSS",
+        "group":  "gss onyx",
+        "smv":  "1.4467"
+    },
+    {
+        "code":  "14414501",
+        "name":  "ENOVAR ONYX THREE GANG ONE WAY SWITCH 16A",
+        "section":  "GSS",
+        "group":  "gss onyx",
+        "smv":  "1.205583333"
+    },
+    {
+        "code":  "14414502",
+        "name":  "ENOVAR ONYX FOUR GANG ONE WAY SWITCH 16A",
+        "section":  "GSS",
+        "group":  "gss onyx",
+        "smv":  "1.943921667"
+    },
+    {
+        "code":  "14414506",
+        "name":  "ENOVAR ONYX FAN REGULATOR 500W",
+        "section":  "GSS",
+        "group":  "gss onyx",
+        "smv":  "1.789476667"
+    },
+    {
+        "code":  "14414508",
+        "name":  "ENOVAR ONYX 2 PIN SOCKET WITH SWITCH 10A",
+        "section":  "GSS",
+        "group":  "gss onyx",
+        "smv":  "1.367848333"
+    },
+    {
+        "code":  "14414509",
+        "name":  "ENOVAR ONYX 3 PIN MULTI SOCKET WITH SWITCH 13A",
+        "section":  "GSS",
+        "group":  "gss onyx",
+        "smv":  "1.561393333"
+    },
+    {
+        "code":  "14414510",
+        "name":  "ENOVAR ONYX 3 PIN ROUND SOCKET WITH SWITCH 32A",
+        "section":  "GSS",
+        "group":  "gss onyx",
+        "smv":  "2.159623333"
+    },
+    {
+        "code":  "14414511",
+        "name":  "ENOVAR ONYX 5 PIN MULTI SOCKET WITH SWITCH 13A",
+        "section":  "GSS",
+        "group":  "gss onyx",
+        "smv":  "2.457205"
+    },
+    {
+        "code":  "14414483",
+        "name":  "ENOVAR LUMIGOLD THREE GANG ONE WAY SWITCH 16A",
+        "section":  "GSS",
+        "group":  "gss lumigold",
+        "smv":  "1.205583333"
+    },
+    {
+        "code":  "14414484",
+        "name":  "ENOVAR LUMIGOLD FOUR GANG ONE WAY SWITCH 16A",
+        "section":  "GSS",
+        "group":  "gss lumigold",
+        "smv":  "1.943921667"
+    },
+    {
+        "code":  "14414485",
+        "name":  "ENOVAR LUMIGOLD ONE GANG TWO WAY SWITCH 16A",
+        "section":  "GSS",
+        "group":  "gss lumigold",
+        "smv":  "1.4467"
+    },
+    {
+        "code":  "14414488",
+        "name":  "ENOVAR LUMIGOLD FAN REGULATOR 500W",
+        "section":  "GSS",
+        "group":  "gss lumigold",
+        "smv":  "1.789476667"
+    },
+    {
+        "code":  "14414489",
+        "name":  "ENOVAR LUMIGOLD DP SWITCH WITH NEON 45A",
+        "section":  "GSS",
+        "group":  "gss lumigold",
+        "smv":  "1.709973333"
+    },
+    {
+        "code":  "14414490",
+        "name":  "ENOVAR LUMIGOLD 2 PIN SOCKET WITH SWITCH 10A",
+        "section":  "GSS",
+        "group":  "gss lumigold",
+        "smv":  "1.367848333"
+    },
+    {
+        "code":  "14414491",
+        "name":  "ENOVAR LUMIGOLD 3 PIN MULTI SOCKET WITH SWITCH 13A",
+        "section":  "GSS",
+        "group":  "gss lumigold",
+        "smv":  "1.561393333"
+    },
+    {
+        "code":  "14414492",
+        "name":  "ENOVAR LUMIGOLD 3 PIN ROUND SOCKET WITH SWITCH 15A",
+        "section":  "GSS",
+        "group":  "gss lumigold",
+        "smv":  "2.159623333"
+    },
+    {
+        "code":  "14414919",
+        "name":  "ENOVAR LUMIGOLD BLANK PLATE",
+        "section":  "GSS",
+        "group":  "gss lumigold",
+        "smv":  "0.16813"
+    },
+    {
+        "code":  "14414452",
+        "name":  "ENOVAR SAFFRON DP SWITCH WITH NEON 45A",
+        "section":  "GSS",
+        "group":  "gss saffron",
+        "smv":  "1.604403333"
+    },
+    {
+        "code":  "14414455",
+        "name":  "ENOVAR SAFFRON 3 PIN ROUND SOCKET WITH SWITCH 32A",
+        "section":  "GSS",
+        "group":  "gss saffron",
+        "smv":  "1.354163333"
+    },
+    {
+        "code":  "14414456",
+        "name":  "ENOVAR SAFFRON 5 PIN MULTI SOCKET WITH SWITCH 13A",
+        "section":  "GSS",
+        "group":  "gss saffron",
+        "smv":  "1.694985"
+    },
+    {
+        "code":  "14414470",
+        "name":  "ENOVAR ORCHID FAN REGULATOR 500W",
+        "section":  "GSS",
+        "group":  "gss orchid",
+        "smv":  "1.457778333"
+    },
+    {
+        "code":  "14414465",
+        "name":  "ENOVAR ORCHID THREE GANG ONE WAY SWITCH 16A",
+        "section":  "GSS",
+        "group":  "gss orchid",
+        "smv":  "3.168403333"
+    },
+    {
+        "code":  "14414466",
+        "name":  "ENOVAR ORCHID FOUR GANG ONE WAY SWITCH 16A",
+        "section":  "GSS",
+        "group":  "gss orchid",
+        "smv":  "3.462956667"
+    },
+    {
+        "code":  "14414439",
+        "name":  "ENOVAR AURORA 5 PIN MULTI SOCKET WITH SWITCH 13A",
+        "section":  "GSS",
+        "group":  "gss aurora",
+        "smv":  "2.871895"
+    }
+]</script>
 <script>
-// Replace with your own item master: [code, group, name, cycle time (Sec), count/cavity]
-const ITEMS = [
-["TC-1001","Yarn","Cotton Yarn Cone 40s",30,6],
-["TC-1002","Yarn","Polyester Yarn Cone 30s",28,6],
-["TC-1003","Yarn","Melange Yarn Cone 20s",35,4],
-["TC-1004","Yarn","Compact Yarn Cone 50s",32,6],
-["FB-2001","Fabric","Plain Weave Fabric 60",22,2],
-["FB-2002","Fabric","Twill Weave Fabric 80",26,2],
-["FB-2003","Fabric","Satin Weave Fabric 100",30,2],
-["FB-2004","Fabric","Rib Knit Fabric 90",24,2],
-["GM-3001","Garment","Basic T-Shirt",40,8],
-["GM-3002","Garment","Polo Shirt",48,8],
-["GM-3003","Garment","Denim Pant",55,6],
-["GM-3004","Garment","Sweatshirt",52,6],
-["AC-4001","Accessory","Printed Label",12,16],
-["AC-4002","Accessory","Woven Tag",14,12],
-["AC-4003","Accessory","Zipper Puller",10,24],
-["AC-4004","Accessory","Button (4-hole)",9,32]
-].map(r => ({code:r[0], group:r[1], name:r[2], ct:r[3], cvt:r[4]}));
-
-function smv(it){ return (it.ct / it.cvt / 60).toFixed(3); }
-function capacity(it){ return Math.round((3600 / it.ct) * it.cvt); }
-
+const ITEMS = JSON.parse(document.getElementById('bulletin-data').textContent || '[]');
+const sections = ["All", ...Array.from(new Set(ITEMS.map(i => i.section)))];
 const groups = ["All", ...Array.from(new Set(ITEMS.map(i => i.group)))];
-let activeGroup = "All";
+let activeSec = "All", activeGroup = "All";
 
 function renderChips(){
   const box = document.getElementById('chips');
   box.innerHTML = '';
+  sections.forEach(s => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (s === activeSec ? ' on' : '');
+    b.textContent = s + (s === 'All' ? ' (' + ITEMS.length + ')' : ' (' + ITEMS.filter(i => i.section === s).length + ')');
+    b.addEventListener('click', () => { activeSec = s; renderChips(); render(); });
+    box.appendChild(b);
+  });
+  const gbox = document.getElementById('gchips');
+  gbox.innerHTML = '';
   groups.forEach(g => {
     const b = document.createElement('button');
-    b.className = 'chip' + (g === activeGroup ? ' on' : '');
-    b.textContent = g + (g === 'All' ? ' (' + ITEMS.length + ')' : ' (' + ITEMS.filter(i => i.group === g).length + ')');
+    b.className = 'gchip' + (g === activeGroup ? ' on' : '');
+    b.textContent = g;
     b.addEventListener('click', () => { activeGroup = g; renderChips(); render(); });
-    box.appendChild(b);
+    gbox.appendChild(b);
   });
 }
 
 function render(){
   const q = (document.getElementById('q').value || '').toLowerCase();
   const rows = ITEMS.filter(i => {
+    const inSec = activeSec === 'All' || i.section === activeSec;
     const inGroup = activeGroup === 'All' || i.group === activeGroup;
     const inSearch = !q || i.name.toLowerCase().includes(q) || i.code.toLowerCase().includes(q) || i.group.toLowerCase().includes(q);
-    return inGroup && inSearch;
+    return inSec && inGroup && inSearch;
   });
-  const tbody = document.getElementById('tbody');
-  const empty = document.getElementById('empty');
   document.getElementById('count').textContent = rows.length + ' items';
-  tbody.innerHTML = rows.map(i => `
+  document.getElementById('tbody').innerHTML = rows.map(i => `
     <tr>
       <td class="code">${i.code}</td>
-      <td><span class="grp">${i.group}</span></td>
-      <td>${i.name}</td>
-      <td class="r cap">${i.ct}</td>
-      <td class="r cap">${i.cvt}</td>
-      <td class="r cap">${capacity(i)}</td>
-      <td class="r smv">${smv(i)}</td>
+      <td><span class="sec ${i.section.toLowerCase()}">${i.section}</span></td>
+      <td class="grp">${i.group}</td>
+      <td class="name">${i.name}</td>
+      <td class="r smv">${i.smv || 'â€”'}</td>
     </tr>`).join('');
-  empty.style.display = rows.length ? 'none' : 'block';
+  document.getElementById('empty').style.display = rows.length ? 'none' : 'block';
 }
-
 document.getElementById('q').addEventListener('input', render);
 renderChips();
 render();
