@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operation Bulletin — ABC Textile</title>
+<style>
+  :root{
+    --ink:#1c2126; --paper:#f4f6fb; --card:#ffffff; --line:#dfe4f0;
+    --accent:#1f6feb; --accent-dark:#143f8f; --muted:#62677a; --warn:#c85c3c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',Helvetica,Arial,sans-serif;background:var(--paper);color:var(--ink);padding-bottom:60px;}
+  .header{background:var(--accent-dark);color:#fff;padding:26px 16px 30px;}
+  .header-inner{max-width:960px;margin:0 auto;}
+  .eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:11px;opacity:.75;margin-bottom:6px;}
+  .header h1{margin:0 0 6px;font-size:24px;}
+  .header p{margin:0;font-size:13px;opacity:.9;}
+  .wrap{max-width:960px;margin:0 auto;padding:0 16px;}
+  .search-row{display:flex;gap:10px;align-items:center;margin:18px 0 12px;flex-wrap:wrap;}
+  .searchbox{flex:1;min-width:220px;display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 14px;}
+  .searchbox input{flex:1;border:0;outline:0;font-size:14px;font-family:inherit;background:transparent;color:var(--ink);}
+  .searchbox input::placeholder{color:#9aa3b2;}
+  .count{font-size:12px;color:var(--muted);}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+  .chip{background:#fff;border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;}
+  .chip.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 8px 24px -14px rgba(20,63,143,.25);}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{background:var(--accent-dark);color:#fff;text-align:left;padding:11px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
+  thead th.r,td.r{text-align:right;}
+  tbody td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:#f7f9ff;}
+  .code{color:var(--accent);font-weight:700;white-space:nowrap;}
+  .grp{display:inline-block;background:#eef1f8;color:var(--accent-dark);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;}
+  .smv{font-weight:800;color:var(--accent-dark);font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .cap{font-variant-numeric:tabular-nums;}
+  .empty{text-align:center;padding:40px 20px;color:var(--muted);}
+  .signature{text-align:center;font-size:11.5px;color:var(--muted);margin-top:24px;}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-inner">
+    <div class="eyebrow">Operational Excellence — ABC Textile</div>
+    <h1>Operation Bulletin</h1>
+    <p>Searchable operation / SMV bulletin by SKU name or item code.</p>
+  </div>
+</div>
+<div class="wrap">
+  <div class="search-row">
+    <div class="searchbox">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="q" type="text" placeholder="Search SKU name or item code…" autocomplete="off">
+    </div>
+    <span class="count" id="count"></span>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Item Code</th><th>Group</th><th>Item Name</th>
+          <th class="r">Cycle Time (s)</th><th class="r">Count</th>
+          <th class="r">Capacity (Pcs/Hr)</th><th class="r">SMV (min)</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="empty" id="empty" style="display:none">No items match your search.</div>
+  </div>
+  <p class="signature">Operation Bulletin — ABC Textile · Operational Excellence</p>
+</div>
+<script>
+// Replace with your own item master: [code, group, name, cycle time (Sec), count/cavity]
+const ITEMS = [
+["TC-1001","Yarn","Cotton Yarn Cone 40s",30,6],
+["TC-1002","Yarn","Polyester Yarn Cone 30s",28,6],
+["TC-1003","Yarn","Melange Yarn Cone 20s",35,4],
+["TC-1004","Yarn","Compact Yarn Cone 50s",32,6],
+["FB-2001","Fabric","Plain Weave Fabric 60",22,2],
+["FB-2002","Fabric","Twill Weave Fabric 80",26,2],
+["FB-2003","Fabric","Satin Weave Fabric 100",30,2],
+["FB-2004","Fabric","Rib Knit Fabric 90",24,2],
+["GM-3001","Garment","Basic T-Shirt",40,8],
+["GM-3002","Garment","Polo Shirt",48,8],
+["GM-3003","Garment","Denim Pant",55,6],
+["GM-3004","Garment","Sweatshirt",52,6],
+["AC-4001","Accessory","Printed Label",12,16],
+["AC-4002","Accessory","Woven Tag",14,12],
+["AC-4003","Accessory","Zipper Puller",10,24],
+["AC-4004","Accessory","Button (4-hole)",9,32]
+].map(r => ({code:r[0], group:r[1], name:r[2], ct:r[3], cvt:r[4]}));
+
+function smv(it){ return (it.ct / it.cvt / 60).toFixed(3); }
+function capacity(it){ return Math.round((3600 / it.ct) * it.cvt); }
+
+const groups = ["All", ...Array.from(new Set(ITEMS.map(i => i.group)))];
+let activeGroup = "All";
+
+function renderChips(){
+  const box = document.getElementById('chips');
+  box.innerHTML = '';
+  groups.forEach(g => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (g === activeGroup ? ' on' : '');
+    b.textContent = g + (g === 'All' ? ' (' + ITEMS.length + ')' : ' (' + ITEMS.filter(i => i.group === g).length + ')');
+    b.addEventListener('click', () => { activeGroup = g; renderChips(); render(); });
+    box.appendChild(b);
+  });
+}
+
+function render(){
+  const q = (document.getElementById('q').value || '').toLowerCase();
+  const rows = ITEMS.filter(i => {
+    const inGroup = activeGroup === 'All' || i.group === activeGroup;
+    const inSearch = !q || i.name.toLowerCase().includes(q) || i.code.toLowerCase().includes(q) || i.group.toLowerCase().includes(q);
+    return inGroup && inSearch;
+  });
+  const tbody = document.getElementById('tbody');
+  const empty = document.getElementById('empty');
+  document.getElementById('count').textContent = rows.length + ' items';
+  tbody.innerHTML = rows.map(i => `
+    <tr>
+      <td class="code">${i.code}</td>
+      <td><span class="grp">${i.group}</span></td>
+      <td>${i.name}</td>
+      <td class="r cap">${i.ct}</td>
+      <td class="r cap">${i.cvt}</td>
+      <td class="r cap">${capacity(i)}</td>
+      <td class="r smv">${smv(i)}</td>
+    </tr>`).join('');
+  empty.style.display = rows.length ? 'none' : 'block';
+}
+
+document.getElementById('q').addEventListener('input', render);
+renderChips();
+render();
+</script>
+</body>
+</html>

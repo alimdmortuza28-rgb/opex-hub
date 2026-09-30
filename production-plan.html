@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Production Plan — ABC Textile</title>
+<style>
+  :root{--ink:#1c2126;--paper:#f4f6fb;--card:#fff;--line:#dfe4f0;--accent:#1f6feb;--accent-dark:#143f8f;--muted:#62677a;--good:#1d9d63;--warn:#d97706;--bad:#dc2626;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',Helvetica,Arial,sans-serif;background:var(--paper);color:var(--ink);padding-bottom:60px;}
+  .header{background:var(--accent-dark);color:#fff;padding:26px 16px 30px;}
+  .header-inner{max-width:1000px;margin:0 auto;}
+  .eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:11px;opacity:.75;margin-bottom:6px;}
+  .header h1{margin:0 0 6px;font-size:24px;}
+  .header p{margin:0;font-size:13px;opacity:.9;}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 16px;}
+  .toolbar{display:flex;align-items:center;gap:10px;margin:16px 0;flex-wrap:wrap;}
+  .btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .btn:hover{background:var(--accent-dark);}
+  .btn.ghost{background:#eef1f8;color:var(--accent-dark);border:1px solid var(--line);}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:16px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{background:#eef1f8;text-align:left;padding:9px 10px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);white-space:nowrap;}
+  tbody td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  input[type=text],input[type=number]{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-size:13px;font-family:inherit;background:#fdfdff;color:var(--ink);}
+  input:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  input.in{width:80px;}
+  .daily{font-weight:800;color:var(--accent-dark);font-variant-numeric:tabular-nums;}
+  .bal{font-variant-numeric:tabular-nums;}
+  .prog{height:8px;border-radius:5px;background:#e5eaf3;overflow:hidden;min-width:90px;}
+  .prog>div{height:100%;border-radius:5px;}
+  .del{background:none;border:none;color:var(--bad);font-size:18px;cursor:pointer;line-height:1;}
+  .hint{font-size:12px;color:var(--muted);}
+  .signature{text-align:center;font-size:11.5px;color:var(--muted);margin-top:24px;}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-inner">
+    <div class="eyebrow">Operational Excellence — ABC Textile</div>
+    <h1>Production Plan</h1>
+    <p>Daily build plan — daily target = remaining balance ÷ working days left.</p>
+  </div>
+</div>
+<div class="wrap">
+  <div class="toolbar">
+    <button class="btn" id="addBtn" type="button">+ Add SKU</button>
+    <button class="btn ghost" id="saveBtn" type="button">Save Plan</button>
+    <span class="hint" id="note"></span>
+  </div>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>SKU / Item</th><th>Group</th><th>Monthly Target</th><th>Produced</th>
+          <th>Working Days Left</th><th>Balance</th><th>Daily Target</th><th>Progress</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+  <p class="signature">Production Plan — ABC Textile · Operational Excellence</p>
+</div>
+<script>
+const KEY="abc_production_plan";
+function ls(){ try{return JSON.parse(localStorage.getItem(KEY)||"[]");}catch(e){return [];} }
+function save(rows){ try{localStorage.setItem(KEY,JSON.stringify(rows));}catch(e){} }
+const DEFAULT=[
+  {sku:"TC-1001",group:"Yarn",target:5000,produced:1200,days:20},
+  {sku:"FB-2001",group:"Fabric",target:3000,produced:800,days:18},
+  {sku:"GM-3001",group:"Garment",target:2000,produced:600,days:15}
+];
+let rows = ls();
+if(!rows.length){ rows = DEFAULT; save(rows); }
+
+function render(){
+  const tb=document.getElementById('tbody');
+  tb.innerHTML='';
+  rows.forEach((r,i)=>{
+    const balance=Math.max(0,(parseFloat(r.target)||0)-(parseFloat(r.produced)||0));
+    const days=parseFloat(r.days)||0;
+    const daily=days>0?Math.round(balance/days):0;
+    const prog=parseFloat(r.target)>0?Math.round((parseFloat(r.produced)||0)/parseFloat(r.target)*100):0;
+    const color=prog>=100?'var(--good)':prog>=50?'var(--accent)':'var(--warn)';
+    tb.insertAdjacentHTML('beforeend',`
+      <tr>
+        <td><input type="text" value="${r.sku}" data-f="sku" data-i="${i}"></td>
+        <td><input type="text" value="${r.group}" data-f="group" data-i="${i}" class="in"></td>
+        <td><input type="number" value="${r.target}" data-f="target" data-i="${i}" class="in"></td>
+        <td><input type="number" value="${r.produced}" data-f="produced" data-i="${i}" class="in"></td>
+        <td><input type="number" value="${r.days}" data-f="days" data-i="${i}" class="in" min="0"></td>
+        <td class="bal">${balance}</td>
+        <td class="daily">${daily}/day</td>
+        <td><div class="prog"><div style="width:${Math.min(100,prog)}%;background:${color}"></div></div></td>
+        <td><button class="del" data-del="${i}">&times;</button></td>
+      </tr>`);
+  });
+  tb.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      const i=parseInt(inp.getAttribute('data-i'));
+      const f=inp.getAttribute('data-f');
+      rows[i][f]=inp.value;
+      render();
+    });
+  });
+  tb.querySelectorAll('.del').forEach(b=>{
+    b.addEventListener('click',()=>{ rows.splice(parseInt(b.getAttribute('data-del')),1); save(rows); render(); });
+  });
+}
+document.getElementById('addBtn').addEventListener('click',()=>{ rows.push({sku:"",group:"",target:0,produced:0,days:20}); render(); });
+document.getElementById('saveBtn').addEventListener('click',()=>{ save(rows); document.getElementById('note').textContent='Saved ✓'; setTimeout(()=>document.getElementById('note').textContent='',2000); });
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Production Dashboard — ABC Textile</title>
+<style>
+  :root{--ink:#1c2126;--paper:#f4f6fb;--card:#fff;--line:#dfe4f0;--accent:#1f6feb;--accent-dark:#143f8f;--muted:#62677a;--good:#1d9d63;--warn:#d97706;--bad:#dc2626;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',Helvetica,Arial,sans-serif;background:var(--paper);color:var(--ink);padding-bottom:60px;}
+  .header{background:var(--accent-dark);color:#fff;padding:26px 16px 30px;}
+  .header-inner{max-width:1000px;margin:0 auto;}
+  .eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:11px;opacity:.75;margin-bottom:6px;}
+  .header h1{margin:0 0 6px;font-size:24px;}
+  .header p{margin:0;font-size:13px;opacity:.9;}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 16px;}
+  .toolbar{display:flex;align-items:center;gap:10px;margin:16px 0;flex-wrap:wrap;}
+  .btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .btn:hover{background:var(--accent-dark);}
+  .hint{font-size:12px;color:var(--muted);}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:18px;}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;}
+  .kpi .l{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+  .kpi .v{font-size:30px;font-weight:800;margin-top:6px;font-variant-numeric:tabular-nums;}
+  .kpi .s{font-size:11px;color:var(--muted);margin-top:4px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:16px;}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent-dark);padding:13px 16px;border-bottom:1px solid var(--line);}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{background:#eef1f8;text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);white-space:nowrap;}
+  tbody td{padding:10px 12px;border-bottom:1px solid var(--line);}
+  tbody tr:last-child td{border-bottom:none;}
+  .empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px;}
+  .signature{text-align:center;font-size:11.5px;color:var(--muted);margin-top:24px;}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-inner">
+    <div class="eyebrow">Operational Excellence — ABC Textile</div>
+    <h1>Daily Production Dashboard</h1>
+    <p>Executive OPEX / IE / Lean summary — OEE, efficiency, lost capacity &amp; wastage.</p>
+  </div>
+</div>
+<div class="wrap">
+  <div class="toolbar">
+    <button class="btn" id="refreshBtn" type="button">Refresh</button>
+    <span class="hint" id="sourceNote"></span>
+  </div>
+  <div class="grid" id="kpiGrid"></div>
+  <div class="card">
+    <h2>Recent OEE Entries</h2>
+    <div id="recentWrap"></div>
+  </div>
+  <p class="signature">Daily Production Dashboard — ABC Textile · Operational Excellence</p>
+</div>
+<script>
+const BACKEND="https://script.google.com/macros/s/AKfycbxzYcdseX9uu1m_otm_ourhAh7Ic_mQQbnHJPvwRiK05BJsP0BwN_uT-1DZFMqo4Bek/exec";
+function ls(){ try{return JSON.parse(localStorage.getItem("abc_oee_submissions")||"[]");}catch(e){return [];} }
+function jsonp(url,cb){var n="cb"+Date.now()+"_"+Math.floor(Math.random()*1e5);var s=document.createElement("script");var done=false;function fin(){delete window[n];if(s.parentNode)s.parentNode.removeChild(s);clearTimeout(t);}var t=setTimeout(function(){if(!done){done=true;fin();cb(null);}},12000);window[n]=function(d){if(done)return;done=true;fin();cb(d);};s.onerror=function(){if(!done){done=true;fin();cb(null);}};s.src=url+(url.indexOf("?")!==-1?"&":"?")+"callback="+encodeURIComponent(n);document.body.appendChild(s);}
+function num(v){const n=parseFloat(v);return isNaN(n)?0:n;}
+function load(){
+  document.getElementById('sourceNote').textContent='Loading…';
+  jsonp(BACKEND+"?action=oeeList",function(j){
+    let rows=[]; let src='Live (Google Sheet)';
+    if(j&&j.ok&&j.rows&&j.rows.length){rows=j.rows;} else {rows=ls(); src='This browser (local)';}
+    document.getElementById('sourceNote').textContent='· '+rows.length+' entry/entries · '+src;
+    render(rows);
+  });
+}
+function pctStr(s){const v=parseFloat(s);return isNaN(v)?null:v;}
+function render(rows){
+  const grid=document.getElementById('kpiGrid');
+  if(!rows.length){
+    grid.innerHTML='<div class="empty">No OEE entries yet. Submit an OEE Entry to see KPIs.</div>';
+    document.getElementById('recentWrap').innerHTML='';
+    return;
+  }
+  const avgs={oee:0,av:0,pf:0,ql:0}; let totProduced=0, totReject=0;
+  rows.forEach(r=>{
+    avgs.oee+=pctStr(r.oeePercent)||0;
+    avgs.av+=pctStr(r.availability)||0;
+    avgs.pf+=pctStr(r.performance)||0;
+    avgs.ql+=pctStr(r.quality)||0;
+    totProduced+=num(r.producedQty); totReject+=num(r.rejectQty);
+  });
+  const n=rows.length;
+  const wast=totProduced?Math.round(totReject/totProduced*1000)/10:0;
+  const kpis=[
+    {l:'Total Entries',v:n,s:'shifts logged'},
+    {l:'Avg OEE',v:(avgs.oee/n).toFixed(1)+'%',s:'target ≥85%'},
+    {l:'Availability',v:(avgs.av/n).toFixed(1)+'%',s:'avg'},
+    {l:'Performance',v:(avgs.pf/n).toFixed(1)+'%',s:'avg'},
+    {l:'Quality',v:(avgs.ql/n).toFixed(1)+'%',s:'avg'},
+    {l:'Total Produced',v:totProduced,s:'pcs'},
+    {l:'Total Reject',v:totReject,s:'pcs'},
+    {l:'Wastage',v:wast+'%',s:'reject ÷ produced'}
+  ];
+  grid.innerHTML=kpis.map(k=>`<div class="kpi"><div class="l">${k.l}</div><div class="v">${k.v}</div><div class="s">${k.s}</div></div>`).join('');
+
+  const recent=rows.slice(-20).reverse();
+  document.getElementById('recentWrap').innerHTML=`<table><thead><tr><th>Date</th><th>Shift</th><th>Machine</th><th>Item</th><th>Produced</th><th>Reject</th><th>OEE</th></tr></thead><tbody>`+
+    recent.map(r=>`<tr><td>${r.date||'—'}</td><td>${r.shift||'—'}</td><td>${r.machine||'—'}</td><td>${r.item||'—'}</td><td>${r.producedQty||0}</td><td>${r.rejectQty||0}</td><td>${r.oeePercent||'—'}</td></tr>`).join('')+`</tbody></table>`;
+}
+document.getElementById('refreshBtn').addEventListener('click',load);
+load();
+</script>
+</body>
+</html>

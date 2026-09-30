@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Production Dashboard — ABC Textile</title>
+<style>
+  :root{--ink:#1c2126;--paper:#f4f6fb;--card:#fff;--line:#dfe4f0;--accent:#1f6feb;--accent-dark:#143f8f;--muted:#62677a;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',Helvetica,Arial,sans-serif;background:var(--paper);color:var(--ink);padding-bottom:60px;}
+  .header{background:var(--accent-dark);color:#fff;padding:22px 16px 26px;}
+  .header-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:11px;opacity:.75;margin-bottom:4px;}
+  .header h1{margin:0;font-size:22px;}
+  .refresh{margin-left:auto;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .refresh:hover{background:rgba(255,255,255,.25);}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 16px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:18px 0;}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;}
+  .kpi .l{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);}
+  .kpi .v{font-size:28px;font-weight:800;margin-top:5px;font-variant-numeric:tabular-nums;}
+  .kpi .s{font-size:11px;color:var(--muted);margin-top:3px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+  @media(max-width:760px){.row2{grid-template-columns:1fr;}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;}
+  .card h2{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent-dark);margin-bottom:12px;}
+  .chartbox{position:relative;height:240px;}
+  .hint{font-size:11px;color:var(--muted);margin-top:6px;text-align:center;}
+  .empty{text-align:center;padding:60px 20px;color:var(--muted);}
+  .signature{text-align:center;font-size:11.5px;color:var(--muted);margin-top:24px;}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <div class="eyebrow">Operational Excellence — ABC Textile</div>
+      <h1>Production Dashboard</h1>
+    </div>
+    <button class="refresh" id="refreshBtn" type="button">↻ Refresh</button>
+  </div>
+</div>
+<div class="wrap">
+  <div class="grid" id="kpiGrid"></div>
+  <div class="row2">
+    <div class="card"><h2>OEE Trend</h2><div class="chartbox"><canvas id="oeeChart"></canvas></div></div>
+    <div class="card"><h2>Production vs Reject</h2><div class="chartbox"><canvas id="prodChart"></canvas></div></div>
+  </div>
+  <p class="signature">Production Dashboard — ABC Textile · Operational Excellence · auto-refresh 30s</p>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const BACKEND="https://script.google.com/macros/s/AKfycbxzYcdseX9uu1m_otm_ourhAh7Ic_mQQbnHJPvwRiK05BJsP0BwN_uT-1DZFMqo4Bek/exec";
+function ls(k){try{return JSON.parse(localStorage.getItem(k)||"[]");}catch(e){return [];}}
+function jsonp(url,cb){var n="cb"+Date.now()+"_"+Math.floor(Math.random()*1e5);var s=document.createElement("script");var done=false;function fin(){delete window[n];if(s.parentNode)s.parentNode.removeChild(s);clearTimeout(t);}var t=setTimeout(function(){if(!done){done=true;fin();cb(null);}},12000);window[n]=function(d){if(done)return;done=true;fin();cb(d);};s.onerror=function(){if(!done){done=true;fin();cb(null);}};s.src=url+(url.indexOf("?")!==-1?"&":"?")+"callback="+encodeURIComponent(n);document.body.appendChild(s);}
+function num(v){const n=parseFloat(v);return isNaN(n)?0:n;}
+function pctStr(s){const v=parseFloat(s);return isNaN(v)?null:v;}
+let charts={};
+function load(){
+  let oeeRows=null, s5Rows=null;
+  jsonp(BACKEND+"?action=oeeList",function(j){
+    oeeRows=(j&&j.ok&&j.rows&&j.rows.length)?j.rows:ls("abc_oee_submissions");
+    jsonp(BACKEND+"?action=5sList",function(k){
+      s5Rows=(k&&k.ok&&k.rows&&k.rows.length)?k.rows:ls("abc_5s_submissions");
+      render(oeeRows,s5Rows);
+    });
+  });
+}
+function render(oee,s5){
+  const grid=document.getElementById('kpiGrid');
+  if(!oee.length && !s5.length){
+    grid.innerHTML='<div class="empty" style="grid-column:1/-1">No data yet. Submit OEE / 5S entries to populate this dashboard.</div>';
+    return;
+  }
+  let o=0,a=0,p=0,q=0,tp=0,tr=0;
+  oee.forEach(r=>{o+=pctStr(r.oeePercent)||0;a+=pctStr(r.availability)||0;p+=pctStr(r.performance)||0;q+=pctStr(r.quality)||0;tp+=num(r.producedQty);tr+=num(r.rejectQty);});
+  const n=oee.length;
+  const wast=tp?Math.round(tr/tp*1000)/10:0;
+  let s5avg=0;
+  if(s5.length) s5avg=Math.round(s5.reduce((x,r)=>x+num(r["Score %"]),0)/s5.length);
+  const kpis=[
+    {l:'OEE Entries',v:n,s:'shifts'},
+    {l:'Avg OEE',v:n?(o/n).toFixed(1)+'%':'—',s:'target ≥85%'},
+    {l:'Availability',v:n?(a/n).toFixed(1)+'%':'—',s:'avg'},
+    {l:'Performance',v:n?(p/n).toFixed(1)+'%':'—',s:'avg'},
+    {l:'Quality',v:n?(q/n).toFixed(1)+'%':'—',s:'avg'},
+    {l:'Produced',v:tp,s:'pcs'},
+    {l:'Reject',v:tr,s:'pcs'},
+    {l:'Wastage',v:wast+'%',s:'reject ÷ produced'},
+    {l:'5S Avg',v:s5avg+'%',s:s5.length+' audit(s)'}
+  ];
+  grid.innerHTML=kpis.map(k=>`<div class="kpi"><div class="l">${k.l}</div><div class="v">${k.v}</div><div class="s">${k.s}</div></div>`).join('');
+
+  const byDate={};
+  oee.forEach(r=>{const d=r.date||'—';if(!byDate[d])byDate[d]={o:0,c:0,p:0,r:0};byDate[d].o+=pctStr(r.oeePercent)||0;byDate[d].c++;byDate[d].p+=num(r.producedQty);byDate[d].r+=num(r.rejectQty);});
+  const dates=Object.keys(byDate).sort();
+  const oeeSeries=dates.map(d=>Math.round(byDate[d].o/byDate[d].c*10)/10);
+  const prodSeries=dates.map(d=>byDate[d].p);
+  const rejSeries=dates.map(d=>byDate[d].r);
+
+  if(typeof Chart!=='undefined'){
+    if(charts.oee)charts.oee.destroy();
+    charts.oee=new Chart(document.getElementById('oeeChart'),{type:'line',data:{labels:dates,datasets:[{label:'OEE %',data:oeeSeries,borderColor:'#1f6feb',backgroundColor:'rgba(31,111,235,.15)',fill:true,tension:.3,pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100}},plugins:{legend:{display:false}}}});
+    if(charts.prod)charts.prod.destroy();
+    charts.prod=new Chart(document.getElementById('prodChart'),{type:'bar',data:{labels:dates,datasets:[{label:'Produced',data:prodSeries,backgroundColor:'#1f6feb'},{label:'Reject',data:rejSeries,backgroundColor:'#dc2626'}]},options:{responsive:true,maintainAspectRatio:false}});
+  }
+}
+document.getElementById('refreshBtn').addEventListener('click',load);
+load();
+setInterval(load,30000);
+</script>
+</body>
+</html>

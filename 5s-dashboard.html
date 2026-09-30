@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5S Dashboard — ABC Textile</title>
+<style>
+  :root{--ink:#1c2126;--paper:#f4f6fb;--card:#fff;--line:#dfe4f0;--accent:#1f6feb;--accent-dark:#143f8f;--muted:#62677a;--good:#1d9d63;--warn:#d97706;--bad:#dc2626;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',Helvetica,Arial,sans-serif;background:var(--paper);color:var(--ink);padding-bottom:60px;}
+  .header{background:var(--accent-dark);color:#fff;padding:26px 16px 30px;}
+  .header-inner{max-width:1000px;margin:0 auto;}
+  .eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:11px;opacity:.75;margin-bottom:6px;}
+  .header h1{margin:0 0 6px;font-size:24px;}
+  .header p{margin:0;font-size:13px;opacity:.9;}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 16px;}
+  .toolbar{display:flex;align-items:center;gap:10px;margin:16px 0;flex-wrap:wrap;}
+  .btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .btn:hover{background:var(--accent-dark);}
+  .hint{font-size:12px;color:var(--muted);}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:18px;}
+  .fcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;}
+  .fcard .f{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--accent-dark);margin-bottom:8px;}
+  .fcard .big{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .fcard .sub{font-size:12px;color:var(--muted);margin-top:4px;}
+  .bar{height:8px;border-radius:5px;background:#e5eaf3;overflow:hidden;margin-top:10px;}
+  .bar>div{height:100%;border-radius:5px;transition:width .4s;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:16px;}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--accent-dark);padding:13px 16px;border-bottom:1px solid var(--line);}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{background:#eef1f8;text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);white-space:nowrap;}
+  tbody td{padding:10px 12px;border-bottom:1px solid var(--line);}
+  tbody tr:last-child td{border-bottom:none;}
+  .score{font-weight:800;font-variant-numeric:tabular-nums;}
+  .pill{display:inline-block;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;color:#fff;}
+  .empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px;}
+  .signature{text-align:center;font-size:11.5px;color:var(--muted);margin-top:24px;}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-inner">
+    <div class="eyebrow">Operational Excellence — ABC Textile</div>
+    <h1>5S Audit Dashboard</h1>
+    <p>Live scores per floor from the 5S audit form.</p>
+  </div>
+</div>
+<div class="wrap">
+  <div class="toolbar">
+    <button class="btn" id="refreshBtn" type="button">Refresh</button>
+    <span class="hint" id="sourceNote"></span>
+  </div>
+  <div class="grid" id="floorGrid"></div>
+  <div class="card">
+    <h2>Recent Audits</h2>
+    <div id="recentWrap"></div>
+  </div>
+  <p class="signature">5S Audit Dashboard — ABC Textile · Operational Excellence</p>
+</div>
+<script>
+const BACKEND = "https://script.google.com/macros/s/AKfycbxzYcdseX9uu1m_otm_ourhAh7Ic_mQQbnHJPvwRiK05BJsP0BwN_uT-1DZFMqo4Bek/exec";
+function ls(){ try{return JSON.parse(localStorage.getItem("abc_5s_submissions")||"[]");}catch(e){return [];} }
+function jsonp(url,cb){var n="cb"+Date.now()+"_"+Math.floor(Math.random()*1e5);var s=document.createElement("script");var done=false;function fin(){delete window[n];if(s.parentNode)s.parentNode.removeChild(s);clearTimeout(t);}var t=setTimeout(function(){if(!done){done=true;fin();cb(null);}},12000);window[n]=function(d){if(done)return;done=true;fin();cb(d);};s.onerror=function(){if(!done){done=true;fin();cb(null);}};s.src=url+(url.indexOf("?")!==-1?"&":"?")+"callback="+encodeURIComponent(n);document.body.appendChild(s);}
+function pct(v){return Math.round(parseFloat(v)||0);}
+function load(){
+  document.getElementById('sourceNote').textContent = 'Loading…';
+  jsonp(BACKEND+"?action=5sList", function(j){
+    let rows = [];
+    let source = 'Live (Google Sheet)';
+    if(j && j.ok && j.rows && j.rows.length){ rows = j.rows; }
+    else { rows = ls(); source = 'This browser (local)'; }
+    document.getElementById('sourceNote').textContent = '· ' + rows.length + ' audit(s) · ' + source;
+    render(rows);
+  });
+}
+function render(rows){
+  const floors = ["IMM","GSS","LED","HAP"];
+  const grid = document.getElementById('floorGrid');
+  grid.innerHTML = '';
+  floors.forEach(f => {
+    const fr = rows.filter(r => (r["Floor / Area"]||"") === f);
+    let latest = null, avg = 0;
+    if(fr.length){
+      latest = fr[fr.length-1];
+      const month = new Date().toISOString().slice(0,7);
+      const m = fr.filter(r => String(r["Audit Date"]||"").slice(0,7)===month);
+      if(m.length) avg = Math.round(m.reduce((a,r)=>a+pct(r["Score %"]),0)/m.length);
+    }
+    const sc = latest ? pct(latest["Score %"]) : 0;
+    const color = sc>=80?'var(--good)':sc>=60?'var(--warn)':'var(--bad)';
+    grid.insertAdjacentHTML('beforeend', `
+      <div class="fcard">
+        <div class="f">${f}</div>
+        <div class="big" style="color:${sc?'var(--ink)':'var(--muted)'}">${latest?sc+'%':'—'}</div>
+        <div class="sub">${latest?('Latest · '+latest["Audit Date"]):'No audit yet'}</div>
+        <div class="sub">Monthly avg: ${fr.length?avg+'%':'—'} · ${fr.length} total</div>
+        <div class="bar"><div style="width:${sc}%;background:${color}"></div></div>
+      </div>`);
+  });
+
+  const rw = document.getElementById('recentWrap');
+  if(!rows.length){
+    rw.innerHTML = '<div class="empty">No audits submitted yet. Fill the 5S Audit form to see scores here.</div>';
+    return;
+  }
+  const recent = rows.slice(-20).reverse();
+  rw.innerHTML = `<table><thead><tr><th>Date</th><th>Floor</th><th>Auditor</th><th>Score</th></tr></thead><tbody>` +
+    recent.map(r => {
+      const s = pct(r["Score %"]);
+      const c = s>=80?'var(--good)':s>=60?'var(--warn)':'var(--bad)';
+      return `<tr><td>${r["Audit Date"]||'—'}</td><td>${r["Floor / Area"]||'—'}</td><td>${r["Auditor Name"]||'—'}</td><td class="score"><span class="pill" style="background:${c}">${s}%</span></td></tr>`;
+    }).join('') + `</tbody></table>`;
+}
+document.getElementById('refreshBtn').addEventListener('click', load);
+load();
+</script>
+</body>
+</html>

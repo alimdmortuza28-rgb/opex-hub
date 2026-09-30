@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QC Review — ABC Textile</title>
+<style>
+  :root{--ink:#1c2126;--paper:#f4f6fb;--card:#fff;--line:#dfe4f0;--accent:#1f6feb;--accent-dark:#143f8f;--muted:#62677a;--good:#1d9d63;--bad:#dc2626;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',Helvetica,Arial,sans-serif;background:var(--paper);color:var(--ink);padding-bottom:60px;}
+  .header{background:var(--accent-dark);color:#fff;padding:26px 16px 30px;}
+  .header-inner{max-width:960px;margin:0 auto;}
+  .eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:11px;opacity:.75;margin-bottom:6px;}
+  .header h1{margin:0 0 6px;font-size:24px;}
+  .header p{margin:0;font-size:13px;opacity:.9;}
+  .wrap{max-width:960px;margin:0 auto;padding:0 16px;}
+  .toolbar{display:flex;align-items:center;gap:10px;margin:16px 0;flex-wrap:wrap;}
+  .btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .btn:hover{background:var(--accent-dark);}
+  .hint{font-size:12px;color:var(--muted);}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:16px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{background:#eef1f8;text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);white-space:nowrap;}
+  tbody td{padding:10px 12px;border-bottom:1px solid var(--line);}
+  tbody tr:last-child td{border-bottom:none;}
+  .verified{color:var(--good);font-weight:700;}
+  .pending{color:var(--bad);font-weight:700;}
+  .btn.verify{background:#eef1f8;color:var(--accent-dark);border:1px solid var(--line);}
+  .btn.verify.on{background:var(--good);color:#fff;border-color:var(--good);}
+  .empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px;}
+  .signature{text-align:center;font-size:11.5px;color:var(--muted);margin-top:24px;}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-inner">
+    <div class="eyebrow">Operational Excellence — ABC Textile</div>
+    <h1>QC Review</h1>
+    <p>Verify reject / wastage for each OEE entry.</p>
+  </div>
+</div>
+<div class="wrap">
+  <div class="toolbar">
+    <button class="btn" id="refreshBtn" type="button">Refresh</button>
+    <span class="hint" id="sourceNote"></span>
+  </div>
+  <div class="card">
+    <div id="listWrap"></div>
+  </div>
+  <p class="signature">QC Review — ABC Textile · Operational Excellence</p>
+</div>
+<script>
+const BACKEND = "https://script.google.com/macros/s/AKfycbxzYcdseX9uu1m_otm_ourhAh7Ic_mQQbnHJPvwRiK05BJsP0BwN_uT-1DZFMqo4Bek/exec";
+function ls(){ try{return JSON.parse(localStorage.getItem("abc_oee_submissions")||"[]");}catch(e){return [];} }
+function vers(){ try{return JSON.parse(localStorage.getItem("abc_qc_verifications")||"{}");}catch(e){return {};} }
+function saveVer(v){ try{localStorage.setItem("abc_qc_verifications",JSON.stringify(v));}catch(e){} }
+function jsonp(url,cb){var n="cb"+Date.now()+"_"+Math.floor(Math.random()*1e5);var s=document.createElement("script");var done=false;function fin(){delete window[n];if(s.parentNode)s.parentNode.removeChild(s);clearTimeout(t);}var t=setTimeout(function(){if(!done){done=true;fin();cb(null);}},12000);window[n]=function(d){if(done)return;done=true;fin();cb(d);};s.onerror=function(){if(!done){done=true;fin();cb(null);}};s.src=url+(url.indexOf("?")!==-1?"&":"?")+"callback="+encodeURIComponent(n);document.body.appendChild(s);}
+function load(){
+  document.getElementById('sourceNote').textContent='Loading…';
+  jsonp(BACKEND+"?action=oeeList", function(j){
+    let rows=[]; let source='Live (Google Sheet)';
+    if(j&&j.ok&&j.rows&&j.rows.length){rows=j.rows;} else {rows=ls(); source='This browser (local)';}
+    document.getElementById('sourceNote').textContent='· '+rows.length+' entry/entries · '+source;
+    render(rows);
+  });
+}
+function render(rows){
+  const wrap=document.getElementById('listWrap');
+  if(!rows.length){ wrap.innerHTML='<div class="empty">No OEE entries yet.</div>'; return; }
+  const v=vers();
+  const recent=rows.slice(-30).reverse();
+  wrap.innerHTML=`<table><thead><tr><th>Date</th><th>Shift</th><th>Machine</th><th>Item</th><th>Produced</th><th>Reject</th><th>Wastage %</th><th>OEE</th><th>QC Status</th><th></th></tr></thead><tbody>`+
+    recent.map((r,i)=>{
+      const id=r.submittedAt||(r.date+'_'+r.machine+'_'+(r.producedQty||'')+'_'+i);
+      const produced=parseFloat(r.producedQty)||0;
+      const reject=parseFloat(r.rejectQty)||0;
+      const wast=produced?Math.round(reject/produced*1000)/10:0;
+      const done=v[id];
+      return `<tr>
+        <td>${r.date||'—'}</td><td>${r.shift||'—'}</td><td>${r.machine||'—'}</td><td>${r.item||'—'}</td>
+        <td>${produced}</td><td>${reject}</td><td>${wast}%</td><td>${r.oeePercent||'—'}</td>
+        <td class="${done?'verified':'pending'}">${done?'Verified':'Pending'}</td>
+        <td><button class="btn verify ${done?'on':''}" data-id="${id}">${done?'✔ Verified':'Verify'}</button></td>
+      </tr>`;
+    }).join('')+`</tbody></table>`;
+  wrap.querySelectorAll('button.verify').forEach(b=>{
+    b.addEventListener('click',()=>{ const v=vers(); const id=b.getAttribute('data-id'); if(v[id]){delete v[id];}else{v[id]=new Date().toISOString();} saveVer(v); render(rows); });
+  });
+}
+document.getElementById('refreshBtn').addEventListener('click',load);
+load();
+</script>
+</body>
+</html>
